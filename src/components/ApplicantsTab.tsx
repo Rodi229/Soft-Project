@@ -97,7 +97,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className={`${headerBgColor} text-white`}>
-          <div className="grid grid-cols-7 gap-4 px-6 py-3 text-sm font-medium">
+          <div className="grid grid-cols-8 gap-4 px-6 py-3 text-sm font-medium">
             <div>CODE</div>
             <div>NAME</div>
             <div>AGE</div>
@@ -109,8 +109,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           </div>
         </div>
         
-        <div className="p-12 text-center text-gray-500">
-          <div className="text-lg mb-2">No applicants found matching your criteria.</div>
+        <div className="py-16 text-center text-gray-500 bg-gray-50">
+          <div className="text-base text-gray-600">No applicants found matching your criteria.</div>
         </div>
       </div>
     </div>
