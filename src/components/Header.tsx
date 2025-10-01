@@ -1,12 +1,15 @@
 import React from 'react';
-import { User, LogOut } from 'lucide-react';
+import { User as UserIcon, LogOut } from 'lucide-react';
+import { User } from '../utils/auth';
 
 interface HeaderProps {
   activeProgram: 'GIP' | 'TUPAD';
   onProgramChange: (program: 'GIP' | 'TUPAD') => void;
+  user: User | null;
+  onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeProgram, onProgramChange }) => {
+const Header: React.FC<HeaderProps> = ({ activeProgram, onProgramChange, user, onLogout }) => {
   const toggleProgram = () => {
     onProgramChange(activeProgram === 'GIP' ? 'TUPAD' : 'GIP');
   };
@@ -20,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ activeProgram, onProgramChange }) => {
           {/* Left side - Logo and Title */}
           <div className="flex items-center space-x-4">
             <div className="bg-yellow-400 text-black px-3 py-2 rounded font-bold text-lg flex items-center justify-center">
-              <User className="w-6 h-6" />
+              <UserIcon className="w-6 h-6" />
             </div>
             <div>
               <h1 className="text-xl font-bold">SOFT PROJECTS MANAGEMENT SYSTEM</h1>
@@ -69,10 +72,14 @@ const Header: React.FC<HeaderProps> = ({ activeProgram, onProgramChange }) => {
             {/* User Info */}
             <div className="flex items-center space-x-3">
               <div className="text-right">
-                <p className="text-sm font-medium">Welcome, ADMIN</p>
-                <p className="text-xs opacity-75">Administrator</p>
+                <p className="text-sm font-medium">Welcome, {user?.name || 'USER'}</p>
+                <p className="text-xs opacity-75 capitalize">{user?.role || 'User'}</p>
               </div>
-              <button className="p-2 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200">
+              <button 
+                onClick={onLogout}
+                className="p-2 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200"
+                title="Logout"
+              >
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
