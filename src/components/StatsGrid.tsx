@@ -1,5 +1,15 @@
 import React from 'react';
-import { Users, Clock, UserCheck, CheckCircle, UserX, X, UserMinus, MapPin } from 'lucide-react';
+import { Users, Clock, UserCheck, CheckCircle, X, UserMinus, MapPin } from 'lucide-react';
+
+interface StatsGridProps {
+  activeProgram: 'GIP' | 'TUPAD';
+}
+
+const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
+  const primaryColor = activeProgram === 'GIP' ? 'bg-red-600' : 'bg-green-600';
+  const primaryDarkColor = activeProgram === 'GIP' ? 'bg-red-700' : 'bg-green-700';
+  const secondaryColor = activeProgram === 'GIP' ? 'bg-red-400' : 'bg-green-400';
+  const secondaryDarkColor = activeProgram === 'GIP' ? 'bg-red-500' : 'bg-green-500';
 
 interface StatsGridProps {
   activeProgram: 'GIP' | 'TUPAD';
