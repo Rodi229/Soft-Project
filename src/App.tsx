@@ -7,22 +7,23 @@ import ReportsTab from './components/ReportsTab';
 
 function App() {
   const [activeTab, setActiveTab] = React.useState('dashboard');
+  const [activeProgram, setActiveProgram] = React.useState<'GIP' | 'TUPAD'>('GIP');
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'applicants':
-        return <ApplicantsTab />;
+        return <ApplicantsTab activeProgram={activeProgram} />;
       case 'reports':
-        return <ReportsTab />;
+        return <ReportsTab activeProgram={activeProgram} />;
       default:
-        return <DashboardTab />;
+        return <DashboardTab activeProgram={activeProgram} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header />
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Header activeProgram={activeProgram} onProgramChange={setActiveProgram} />
+      <Navigation activeTab={activeTab} onTabChange={setActiveTab} activeProgram={activeProgram} />
       <div className="max-w-7xl mx-auto px-4 py-6">
         {renderTabContent()}
       </div>

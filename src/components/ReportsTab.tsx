@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { BarChart3, PieChart, Printer, Download, FileText, Users } from 'lucide-react';
 
-const ReportsTab: React.FC = () => {
+interface ReportsTabProps {
+  activeProgram: 'GIP' | 'TUPAD';
+}
+
+const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
   const [selectedReportType, setSelectedReportType] = useState('summary');
+  
+  const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
+  const programName = activeProgram === 'GIP' ? 'GIP' : 'TUPAD';
 
   const reportTypes = [
     { id: 'summary', label: 'Summary Report', icon: BarChart3, color: 'border-blue-500 bg-blue-50' },
@@ -23,7 +30,7 @@ const ReportsTab: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">GIP REPORTS</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{programName} REPORTS</h1>
           <p className="text-gray-600">Generate and view comprehensive reports</p>
         </div>
         <div className="flex space-x-2">
@@ -35,7 +42,7 @@ const ReportsTab: React.FC = () => {
             <Download className="w-4 h-4" />
             <span>CSV</span>
           </button>
-          <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+          <button className={`${primaryColor} text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200`}>
             <FileText className="w-4 h-4" />
             <span>PDF</span>
           </button>
@@ -81,7 +88,7 @@ const ReportsTab: React.FC = () => {
 
       {/* Report Content */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-        <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">GIP SUMMARY REPORT</h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">{programName} SUMMARY REPORT</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {summaryData.map((item, index) => (

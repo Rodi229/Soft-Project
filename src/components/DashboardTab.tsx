@@ -2,11 +2,15 @@ import React from 'react';
 import HeroSection from './HeroSection';
 import StatsGrid from './StatsGrid';
 
-const DashboardTab: React.FC = () => {
+interface DashboardTabProps {
+  activeProgram: 'GIP' | 'TUPAD';
+}
+
+const DashboardTab: React.FC<DashboardTabProps> = ({ activeProgram }) => {
   return (
     <>
-      <HeroSection />
-      <StatsGrid />
+      <HeroSection activeProgram={activeProgram} />
+      <StatsGrid activeProgram={activeProgram} />
     </>
   );
 };

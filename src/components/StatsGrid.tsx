@@ -1,7 +1,16 @@
 import React from 'react';
 import { Users, Clock, UserCheck, CheckCircle, UserX, X, UserMinus, MapPin } from 'lucide-react';
 
-const StatsGrid: React.FC = () => {
+interface StatsGridProps {
+  activeProgram: 'GIP' | 'TUPAD';
+}
+
+const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
+  const primaryColor = activeProgram === 'GIP' ? 'bg-red-600' : 'bg-green-600';
+  const primaryDarkColor = activeProgram === 'GIP' ? 'bg-red-700' : 'bg-green-700';
+  const secondaryColor = activeProgram === 'GIP' ? 'bg-red-400' : 'bg-green-400';
+  const secondaryDarkColor = activeProgram === 'GIP' ? 'bg-red-500' : 'bg-green-500';
+
   const stats = [
     {
       title: 'TOTAL APPLICANTS',
@@ -9,8 +18,8 @@ const StatsGrid: React.FC = () => {
       male: '0',
       female: '0',
       icon: Users,
-      bgColor: 'bg-red-600',
-      iconBg: 'bg-red-700',
+      bgColor: primaryColor,
+      iconBg: primaryDarkColor,
     },
     {
       title: 'PENDING',
@@ -18,8 +27,8 @@ const StatsGrid: React.FC = () => {
       male: '0',
       female: '0',
       icon: Clock,
-      bgColor: 'bg-red-400',
-      iconBg: 'bg-red-500',
+      bgColor: secondaryColor,
+      iconBg: secondaryDarkColor,
     },
     {
       title: 'APPROVED',
