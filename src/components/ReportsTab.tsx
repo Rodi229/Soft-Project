@@ -42,7 +42,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
             <Download className="w-4 h-4" />
             <span>CSV</span>
           </button>
-          <button className={`${primaryColor} text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200`}>
+          <button className="bg-red-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
             <FileText className="w-4 h-4" />
             <span>PDF</span>
           </button>
