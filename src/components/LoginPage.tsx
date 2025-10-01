@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Shield, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Eye, EyeOff } from 'lucide-react';
+import SantaRosaLogo from "../assets/SantaRosa.png"; // adjust the path if needed
 
 interface LoginPageProps {
   onLogin: (username: string, password: string) => Promise<boolean>;
@@ -82,14 +83,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-red-600 via-orange-700 to-yellow-600 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Logo and Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <Shield className="w-8 h-8 text-blue-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
+              <img
+                src={SantaRosaLogo}
+                alt="Santa Rosa Logo"
+                className="w-15 h-15 object-contain"
+              />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">SOFT PROJECTS</h1>
             <p className="text-gray-600 text-sm mb-1">Application Management System</p>
@@ -120,7 +125,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
                   placeholder="Enter username"
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
                     errors.username 
                       ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                       : 'border-gray-300'
@@ -148,7 +153,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   placeholder="Enter password"
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
                     errors.password 
                       ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
                       : 'border-gray-300'
@@ -177,7 +182,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+              className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
             >
               {isLoading ? (
                 <div className="flex items-center space-x-2">

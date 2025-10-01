@@ -1,7 +1,23 @@
 import React from 'react';
-import { Users, Clock, UserCheck, CheckCircle, UserX, X, UserMinus, MapPin } from 'lucide-react';
+import { Users, Clock, UserCheck, CheckCircle, X, UserMinus, MapPin } from 'lucide-react';
 
-  const stats = [
+interface Stat {
+  title: string;
+  value: string;
+  male: string;
+  female: string;
+  icon: any;
+  bgColor: string;
+  iconBg: string;
+}
+
+const StatsGrid: React.FC = () => {
+  const primaryColor = 'bg-purple-500';
+  const primaryDarkColor = 'bg-purple-600';
+  const secondaryColor = 'bg-yellow-500';
+  const secondaryDarkColor = 'bg-yellow-600';
+
+  const stats: Stat[] = [
     {
       title: 'TOTAL APPLICANTS',
       value: '0',
@@ -94,7 +110,7 @@ import { Users, Clock, UserCheck, CheckCircle, UserX, X, UserMinus, MapPin } fro
                 <Icon className="w-8 h-8" />
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4 text-xs opacity-75">
               <div className="flex items-center space-x-1">
                 <Users className="w-3 h-3" />
@@ -105,8 +121,7 @@ import { Users, Clock, UserCheck, CheckCircle, UserX, X, UserMinus, MapPin } fro
                 <span>{stat.female}</span>
               </div>
             </div>
-            
-            {/* Decorative background pattern */}
+
             <div className="absolute -right-4 -bottom-4 opacity-10">
               <Icon className="w-20 h-20" />
             </div>
