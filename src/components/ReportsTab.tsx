@@ -1,41 +1,43 @@
 import React, { useState } from 'react';
 import { BarChart3, PieChart, Printer, Download, FileText } from 'lucide-react';
 import { exportStatsToCSV, exportStatsToPDF, printStats, StatsData } from '../utils/exportUtils';
+import { useData } from '../hooks/useData';
 
 interface ReportsTabProps {
   activeProgram: 'GIP' | 'TUPAD';
 }
 
 const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
+  const { statistics, barangayStats, statusStats, genderStats, isLoading } = useData(activeProgram);
   const [selectedReportType, setSelectedReportType] = useState('summary');
   
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
   const programName = activeProgram === 'GIP' ? 'GIP' : 'TUPAD';
 
-  // Mock stats data - in real app, this would come from your backend
-  const mockStats: StatsData = {
-    totalApplicants: 0,
-    pending: 0,
-    approved: 0,
-    deployed: 0,
-    completed: 0,
-    rejected: 0,
-    resigned: 0,
-    barangaysCovered: 0,
-    maleCount: 0,
-    femaleCount: 0
+  // Convert statistics to StatsData format for export functions
+  const statsData: StatsData = {
+    totalApplicants: statistics.totalApplicants,
+    pending: statistics.pending,
+    approved: statistics.approved,
+    deployed: statistics.deployed,
+    completed: statistics.completed,
+    rejected: statistics.rejected,
+    resigned: statistics.resigned,
+    barangaysCovered: statistics.barangaysCovered,
+    maleCount: statistics.maleCount,
+    femaleCount: statistics.femaleCount
   };
 
   const handlePrint = () => {
-    printStats(mockStats, activeProgram);
+    printStats(statsData, activeProgram);
   };
 
   const handleExportCSV = () => {
-    exportStatsToCSV(mockStats, activeProgram);
+    exportStatsToCSV(statsData, activeProgram);
   };
 
   const handleExportPDF = () => {
-    exportStatsToPDF(mockStats, activeProgram);
+    exportStatsToPDF(statsData, activeProgram);
   };
 
   const reportTypes = [
@@ -46,26 +48,34 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
   ];
 
   const summaryData = [
-    { label: 'Total Applicants', value: '0', male: '0', female: '0', color: 'text-blue-600' },
-    { label: 'Approved', value: '0', male: '0', female: '0', color: 'text-green-600' },
-    { label: 'Deployed', value: '0', male: '0', female: '0', color: 'text-orange-600' },
-    { label: 'Completed', value: '0', male: '0', female: '0', color: 'text-purple-600' },
+    { label: 'Total Applicants', value: statistics.totalApplicants.toString(), male: statistics.maleCount.toString(), female: statistics.femaleCount.toString(), color: 'text-blue-600' },
+    { label: 'Approved', value: statistics.approved.toString(), male: '0', female: '0', color: 'text-green-600' },
+    { label: 'Deployed', value: statistics.deployed.toString(), male: '0', female: '0', color: 'text-orange-600' },
+    { label: 'Completed', value: statistics.completed.toString(), male: '0', female: '0', color: 'text-purple-600' },
   ];
 
-  const barangays = [
-    'APLAYA', 'BALIBAGO', 'CAINGIN', 'DILA', 'DITA', 'DON JOSE', 'IBABA', 
-    'KANLURAN', 'LABAS', 'MACABLING', 'MALITLIT', 'MALUSAK', 'MARKET AREA', 
-    'POOC', 'PULONG SANTA CRUZ', 'SANTO DOMINGO', 'SINALHAN', 'TAGAPO'
-  ];
-
-  const statusTypes = [
-    { name: 'PENDING', color: 'bg-yellow-100 text-yellow-800', count: 0 },
-    { name: 'APPROVED', color: 'bg-blue-100 text-blue-800', count: 0 },
-    { name: 'DEPLOYED', color: 'bg-green-100 text-green-800', count: 0 },
-    { name: 'COMPLETED', color: 'bg-pink-100 text-pink-800', count: 0 },
-    { name: 'REJECTED', color: 'bg-orange-100 text-orange-800', count: 0 },
-    { name: 'RESIGNED', color: 'bg-gray-100 text-gray-800', count: 0 },
-  ];
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{programName} REPORTS</h1>
+            <p className="text-gray-600">Generate and view comprehensive reports</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-20 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderReportContent = () => {
     switch (selectedReportType) {
@@ -91,16 +101,16 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {barangays.map((barangay, index) => (
+                  {barangayStats.map((barangay, index) => (
                     <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{barangay}</td>
-                      <td className="py-3 px-4 text-center">0</td>
-                      <td className="py-3 px-4 text-center">0</td>
-                      <td className="py-3 px-4 text-center">0</td>
-                      <td className="py-3 px-4 text-center">0</td>
-                      <td className="py-3 px-4 text-center">0</td>
-                      <td className="py-3 px-4 text-center">0</td>
-                      <td className="py-3 px-4 text-center">0</td>
+                      <td className="py-3 px-4 font-medium">{barangay.barangay}</td>
+                      <td className="py-3 px-4 text-center">{barangay.total}</td>
+                      <td className="py-3 px-4 text-center">{barangay.male}</td>
+                      <td className="py-3 px-4 text-center">{barangay.female}</td>
+                      <td className="py-3 px-4 text-center">{barangay.pending}</td>
+                      <td className="py-3 px-4 text-center">{barangay.approved}</td>
+                      <td className="py-3 px-4 text-center">{barangay.deployed}</td>
+                      <td className="py-3 px-4 text-center">{barangay.completed}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -117,13 +127,13 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {statusTypes.map((status, index) => (
+              {statusStats.map((status, index) => (
                 <div key={index} className="text-center p-6 rounded-lg bg-gray-50 border">
                   <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 ${status.color}`}>
-                    {status.name}
+                    {status.status}
                   </div>
                   <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {status.count}
+                    {status.total}
                   </div>
                   <div className="text-sm text-gray-600">
                     Applicants
@@ -142,39 +152,51 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Male Column */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h4 className="text-xl font-bold text-center mb-6 text-gray-800">
-                  MALE (0)
-                </h4>
-                <div className="space-y-4">
-                  {statusTypes.map((status, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${status.color}`}>
-                        {status.name}
+              {genderStats.map((genderData, genderIndex) => (
+                <div key={genderIndex} className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="text-xl font-bold text-center mb-6 text-gray-800">
+                    {genderData.gender} ({genderData.total})
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                        PENDING
                       </span>
-                      <span className="text-lg font-semibold text-gray-900">0</span>
+                      <span className="text-lg font-semibold text-gray-900">{genderData.pending}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Female Column */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h4 className="text-xl font-bold text-center mb-6 text-gray-800">
-                  FEMALE (0)
-                </h4>
-                <div className="space-y-4">
-                  {statusTypes.map((status, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${status.color}`}>
-                        {status.name}
+                    <div className="flex items-center justify-between">
+                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        APPROVED
                       </span>
-                      <span className="text-lg font-semibold text-gray-900">0</span>
+                      <span className="text-lg font-semibold text-gray-900">{genderData.approved}</span>
                     </div>
-                  ))}
+                    <div className="flex items-center justify-between">
+                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        DEPLOYED
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">{genderData.deployed}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-pink-100 text-pink-800">
+                        COMPLETED
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">{genderData.completed}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                        REJECTED
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">{genderData.rejected}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                        RESIGNED
+                      </span>
+                      <span className="text-lg font-semibold text-gray-900">{genderData.resigned}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         );

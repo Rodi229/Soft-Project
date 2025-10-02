@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { Search, Plus, Download, FileText, X, Upload } from "lucide-react";
-import { exportApplicantsToCSV, exportApplicantsToPDF, printApplicants, ApplicantData } from '../utils/exportUtils';
+import { exportApplicantsToCSV, exportApplicantsToPDF, printApplicants } from '../utils/exportUtils';
+import { useData } from '../hooks/useData';
+import { Applicant, calculateAge } from '../utils/dataService';
 
 interface ApplicantsTabProps {
   activeProgram: 'GIP' | 'TUPAD';
 }
 
 const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
+  const { statistics, addApplicant, getFilteredApplicants, refreshData } = useData(activeProgram);
+  
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Status');
@@ -14,39 +18,142 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   const [genderFilter, setGenderFilter] = useState('All Genders');
   const [ageFilter, setAgeFilter] = useState('All Ages');
   const [educationFilter, setEducationFilter] = useState('All Education Levels');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    extensionName: '',
+    birthDate: '',
+    barangay: '',
+    contactNumber: '',
+    gender: 'MALE' as 'MALE' | 'FEMALE',
+    educationalAttainment: '',
+    beneficiaryName: '',
+    status: 'PENDING' as 'PENDING' | 'APPROVED' | 'DEPLOYED' | 'COMPLETED' | 'REJECTED' | 'RESIGNED'
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const openModal = () => setShowModal(true);
-  const closeModal = () => setShowModal(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Applicant submitted");
+  const closeModal = () => {
     setShowModal(false);
+    setFormData({
+      firstName: '',
+      middleName: '',
+      lastName: '',
+      extensionName: '',
+      birthDate: '',
+      barangay: '',
+      contactNumber: '',
+      gender: 'MALE',
+      educationalAttainment: '',
+      beneficiaryName: '',
+      status: 'PENDING'
+    });
   };
 
-  // Mock data for demonstration - in real app, this would come from your backend
-  const mockApplicants: ApplicantData[] = [
-    // Add some sample data when needed
-  ];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.firstName || !formData.lastName || !formData.birthDate || !formData.barangay || !formData.contactNumber || !formData.educationalAttainment) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const age = calculateAge(formData.birthDate);
+      
+      // Age validation based on program
+      if (activeProgram === 'GIP' && (age < 18 || age > 29)) {
+        alert('GIP applicants must be between 18-29 years old');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (activeProgram === 'TUPAD' && age < 18) {
+        alert('TUPAD applicants must be 18 years old or above');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const applicantData: Omit<Applicant, 'id' | 'code' | 'dateSubmitted'> = {
+        ...formData,
+        age,
+        encoder: 'Administrator',
+        program: activeProgram
+      };
+      
+      await addApplicant(applicantData);
+      closeModal();
+      alert('Applicant added successfully!');
+    } catch (error) {
+      console.error('Error adding applicant:', error);
+      alert('Error adding applicant. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Get filtered applicants based on current filters
+  const filteredApplicants = getFilteredApplicants({
+    searchTerm,
+    status: statusFilter,
+    barangay: barangayFilter,
+    gender: genderFilter,
+    ageRange: ageFilter,
+    education: educationFilter
+  });
 
   const handleExportCSV = () => {
-    exportApplicantsToCSV(mockApplicants, activeProgram);
+    const exportData = filteredApplicants.map(applicant => ({
+      code: applicant.code,
+      name: `${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim(),
+      age: applicant.age,
+      barangay: applicant.barangay,
+      gender: applicant.gender,
+      status: applicant.status,
+      dateSubmitted: applicant.dateSubmitted
+    }));
+    exportApplicantsToCSV(exportData, activeProgram);
   };
 
   const handleExportPDF = () => {
-    exportApplicantsToPDF(mockApplicants, activeProgram);
+    const exportData = filteredApplicants.map(applicant => ({
+      code: applicant.code,
+      name: `${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim(),
+      age: applicant.age,
+      barangay: applicant.barangay,
+      gender: applicant.gender,
+      status: applicant.status,
+      dateSubmitted: applicant.dateSubmitted
+    }));
+    exportApplicantsToPDF(exportData, activeProgram);
   };
 
   const handlePrint = () => {
-    printApplicants(mockApplicants, activeProgram);
+    const exportData = filteredApplicants.map(applicant => ({
+      code: applicant.code,
+      name: `${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim(),
+      age: applicant.age,
+      barangay: applicant.barangay,
+      gender: applicant.gender,
+      status: applicant.status,
+      dateSubmitted: applicant.dateSubmitted
+    }));
+    printApplicants(exportData, activeProgram);
   };
+  
   // Dynamic colors and content based on active program
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
   const focusColor = activeProgram === 'GIP' ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-green-500 focus:border-green-500';
   const headerBgColor = activeProgram === 'GIP' ? 'bg-red-600' : 'bg-green-600';
   const headerDarkBgColor = activeProgram === 'GIP' ? 'bg-red-700' : 'bg-green-700';
   const programName = activeProgram === 'GIP' ? 'GIP' : 'TUPAD';
-  const applicantCode = activeProgram === 'GIP' ? 'GIP-000001' : 'TUPAD-000001';
 
   return (
     <div className="space-y-6">
@@ -54,7 +161,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{programName} APPLICANTS</h1>
-          <p className="text-gray-600">Total: 0 applicants</p>
+          <p className="text-gray-600">Total: {statistics.totalApplicants} applicants</p>
         </div>
         <button
           onClick={openModal}
@@ -199,9 +306,41 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           </div>
         </div>
 
-        <div className="p-12 text-center text-gray-500">
-          <div className="text-lg mb-2">No applicants found matching your criteria.</div>
-        </div>
+        {filteredApplicants.length === 0 ? (
+          <div className="p-12 text-center text-gray-500">
+            <div className="text-lg mb-2">No applicants found matching your criteria.</div>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {filteredApplicants.map((applicant) => (
+              <div key={applicant.id} className="grid grid-cols-8 gap-4 px-6 py-4 hover:bg-gray-50">
+                <div className="font-medium text-sm">{applicant.code}</div>
+                <div className="text-sm">
+                  {`${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim()}
+                </div>
+                <div className="text-sm">{applicant.age}</div>
+                <div className="text-sm">{applicant.barangay}</div>
+                <div className="text-sm">{applicant.gender}</div>
+                <div className="text-sm">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    applicant.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                    applicant.status === 'APPROVED' ? 'bg-blue-100 text-blue-800' :
+                    applicant.status === 'DEPLOYED' ? 'bg-green-100 text-green-800' :
+                    applicant.status === 'COMPLETED' ? 'bg-pink-100 text-pink-800' :
+                    applicant.status === 'REJECTED' ? 'bg-orange-100 text-orange-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {applicant.status}
+                  </span>
+                </div>
+                <div className="text-sm">{applicant.dateSubmitted}</div>
+                <div className="text-sm">
+                  <button className="text-blue-600 hover:text-blue-800 text-xs">Edit</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal */}

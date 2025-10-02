@@ -1,93 +1,86 @@
 import React from 'react';
 import { Users, Clock, UserCheck, CheckCircle, X, UserMinus, MapPin } from 'lucide-react';
+import { useData } from '../hooks/useData';
 
 interface StatsGridProps {
   activeProgram: 'GIP' | 'TUPAD';
 }
 
-interface Stat {
-  title: string;
-  value: string;
-  male: string;
-  female: string;
-  icon: any;
-  bgColor: string;
-  iconBg: string;
-}
-
 const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
+  const { statistics, isLoading } = useData(activeProgram);
+  
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-500' : 'bg-green-500';
   const primaryDarkColor = activeProgram === 'GIP' ? 'bg-red-600' : 'bg-green-600';
   const secondaryColor = activeProgram === 'GIP' ? 'bg-orange-500' : 'bg-blue-500';
   const secondaryDarkColor = activeProgram === 'GIP' ? 'bg-orange-600' : 'bg-blue-600';
 
-  const stats: Stat[] = [
+  const stats = [
     {
       title: 'TOTAL APPLICANTS',
-      value: '0',
-      male: '0',
-      female: '0',
+      value: statistics.totalApplicants.toString(),
+      male: statistics.maleCount.toString(),
+      female: statistics.femaleCount.toString(),
       icon: Users,
       bgColor: primaryColor,
       iconBg: primaryDarkColor,
     },
     {
       title: 'PENDING',
-      value: '0',
-      male: '0',
-      female: '0',
+      value: statistics.pending.toString(),
+      male: '0', // Will be calculated from filtered data
+      female: '0', // Will be calculated from filtered data
       icon: Clock,
       bgColor: secondaryColor,
       iconBg: secondaryDarkColor,
     },
     {
       title: 'APPROVED',
-      value: '0',
-      male: '0',
-      female: '0',
+      value: statistics.approved.toString(),
+      male: '0', // Will be calculated from filtered data
+      female: '0', // Will be calculated from filtered data
       icon: UserCheck,
       bgColor: 'bg-blue-500',
       iconBg: 'bg-blue-600',
     },
     {
       title: 'DEPLOYED',
-      value: '0',
-      male: '0',
-      female: '0',
+      value: statistics.deployed.toString(),
+      male: '0', // Will be calculated from filtered data
+      female: '0', // Will be calculated from filtered data
       icon: CheckCircle,
       bgColor: 'bg-green-500',
       iconBg: 'bg-green-600',
     },
     {
       title: 'COMPLETED',
-      value: '0',
-      male: '0',
-      female: '0',
+      value: statistics.completed.toString(),
+      male: '0', // Will be calculated from filtered data
+      female: '0', // Will be calculated from filtered data
       icon: CheckCircle,
       bgColor: 'bg-pink-400',
       iconBg: 'bg-pink-500',
     },
     {
       title: 'REJECTED',
-      value: '0',
-      male: '0',
-      female: '0',
+      value: statistics.rejected.toString(),
+      male: '0', // Will be calculated from filtered data
+      female: '0', // Will be calculated from filtered data
       icon: X,
       bgColor: 'bg-orange-500',
       iconBg: 'bg-orange-600',
     },
     {
       title: 'RESIGNED',
-      value: '0',
-      male: '0',
-      female: '0',
+      value: statistics.resigned.toString(),
+      male: '0', // Will be calculated from filtered data
+      female: '0', // Will be calculated from filtered data
       icon: UserMinus,
       bgColor: 'bg-gray-500',
       iconBg: 'bg-gray-600',
     },
     {
       title: 'BARANGAYS COVERED',
-      value: '0',
+      value: statistics.barangaysCovered.toString(),
       male: '0',
       female: '0',
       icon: MapPin,
@@ -95,6 +88,16 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       iconBg: 'bg-gray-700',
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="bg-gray-200 animate-pulse rounded-lg p-6 h-32"></div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
