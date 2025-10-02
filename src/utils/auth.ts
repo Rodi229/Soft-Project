@@ -21,13 +21,6 @@ const MOCK_USERS = [
     password: 'admin123',
     role: 'admin' as const,
     name: 'ADMIN'
-  },
-  {
-    id: '2',
-    username: 'user',
-    password: 'user123',
-    role: 'user' as const,
-    name: 'USER'
   }
 ];
 
