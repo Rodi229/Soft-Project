@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart3, PieChart, Printer, Download, FileText, Users } from 'lucide-react';
+import { exportStatsToCSV, exportStatsToPDF, printStats, StatsData } from '../utils/exportUtils';
 
 interface ReportsTabProps {
   activeProgram: 'GIP' | 'TUPAD';
@@ -11,6 +12,31 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
   const programName = activeProgram === 'GIP' ? 'GIP' : 'TUPAD';
 
+  // Mock stats data - in real app, this would come from your backend
+  const mockStats: StatsData = {
+    totalApplicants: 0,
+    pending: 0,
+    approved: 0,
+    deployed: 0,
+    completed: 0,
+    rejected: 0,
+    resigned: 0,
+    barangaysCovered: 0,
+    maleCount: 0,
+    femaleCount: 0
+  };
+
+  const handlePrint = () => {
+    printStats(mockStats, activeProgram);
+  };
+
+  const handleExportCSV = () => {
+    exportStatsToCSV(mockStats, activeProgram);
+  };
+
+  const handleExportPDF = () => {
+    exportStatsToPDF(mockStats, activeProgram);
+  };
   const reportTypes = [
     { id: 'summary', label: 'Summary Report', icon: BarChart3, color: 'border-blue-500 bg-blue-50' },
     { id: 'barangay', label: 'By Barangay', icon: PieChart, color: 'border-green-500 bg-green-50' },
@@ -34,15 +60,24 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
           <p className="text-gray-600">Generate and view comprehensive reports</p>
         </div>
         <div className="flex space-x-2">
-          <button className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+          <button 
+            onClick={handlePrint}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+          >
             <Printer className="w-4 h-4" />
             <span>Print</span>
           </button>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+          <button 
+            onClick={handleExportCSV}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+          >
             <Download className="w-4 h-4" />
             <span>CSV</span>
           </button>
-          <button className="bg-red-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+          <button 
+            onClick={handleExportPDF}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+          >
             <FileText className="w-4 h-4" />
             <span>PDF</span>
           </button>

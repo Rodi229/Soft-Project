@@ -72,6 +72,11 @@ export const useAuth = () => {
       user: null,
       token: null
     });
+    
+    // Force page reload to ensure clean state
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   }, []);
 
   return {

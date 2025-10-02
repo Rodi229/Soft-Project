@@ -77,10 +77,10 @@ const Header: React.FC<HeaderProps> = ({ activeProgram, onProgramChange, user, o
               </div>
               <button 
                 onClick={onLogout}
-                className="p-2 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200"
+                className="p-2 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 group"
                 title="Logout"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
               </button>
             </div>
           </div>

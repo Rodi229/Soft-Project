@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, Plus, Download, FileText, X, Upload } from "lucide-react";
+import { exportApplicantsToCSV, exportApplicantsToPDF, printApplicants, ApplicantData } from '../utils/exportUtils';
 
 interface ApplicantsTabProps {
   activeProgram: 'GIP' | 'TUPAD';
@@ -7,6 +8,12 @@ interface ApplicantsTabProps {
 
 const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [barangayFilter, setBarangayFilter] = useState('All Barangays');
+  const [genderFilter, setGenderFilter] = useState('All Genders');
+  const [ageFilter, setAgeFilter] = useState('All Ages');
+  const [educationFilter, setEducationFilter] = useState('All Education Levels');
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -17,6 +24,22 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     setShowModal(false);
   };
 
+  // Mock data for demonstration - in real app, this would come from your backend
+  const mockApplicants: ApplicantData[] = [
+    // Add some sample data when needed
+  ];
+
+  const handleExportCSV = () => {
+    exportApplicantsToCSV(mockApplicants, activeProgram);
+  };
+
+  const handleExportPDF = () => {
+    exportApplicantsToPDF(mockApplicants, activeProgram);
+  };
+
+  const handlePrint = () => {
+    printApplicants(mockApplicants, activeProgram);
+  };
   // Dynamic colors and content based on active program
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
   const focusColor = activeProgram === 'GIP' ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-green-500 focus:border-green-500';
@@ -49,12 +72,18 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search applicants..."
               className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}
             />
           </div>
 
-          <select className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}>
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}
+          >
             <option>All Status</option>
             <option>Pending</option>
             <option>Approved</option>
@@ -64,7 +93,11 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <option>Resigned</option>
           </select>
 
-          <select className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}>
+          <select 
+            value={barangayFilter}
+            onChange={(e) => setBarangayFilter(e.target.value)}
+            className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}
+          >
             <option>All Barangays</option>
             <option>APLAYA</option>
             <option>BALIBAGO</option>
@@ -88,13 +121,21 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <select className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}>
+          <select 
+            value={genderFilter}
+            onChange={(e) => setGenderFilter(e.target.value)}
+            className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}
+          >
             <option>All Genders</option>
             <option>MALE</option>
             <option>FEMALE</option>
           </select>
 
-          <select className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}>
+          <select 
+            value={ageFilter}
+            onChange={(e) => setAgeFilter(e.target.value)}
+            className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}
+          >
             <option>All Ages</option>
             <option>18-25</option>
             <option>26-35</option>
@@ -102,7 +143,11 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <option>46+</option>
           </select>
 
-          <select className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}>
+          <select 
+            value={educationFilter}
+            onChange={(e) => setEducationFilter(e.target.value)}
+            className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}
+          >
             <option>All Education Levels</option>
             <option>JUNIOR HIGH SCHOOL GRADUATE</option>
             <option>SENIOR HIGH SCHOOL GRADUATE</option>
@@ -115,13 +160,26 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         </div>
 
         <div className="flex space-x-2 mt-4">
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+          <button 
+            onClick={handleExportCSV}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+          >
             <Download className="w-4 h-4" />
             <span>CSV</span>
           </button>
-          <button className="bg-red-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+          <button 
+            onClick={handleExportPDF}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+          >
             <FileText className="w-4 h-4" />
             <span>PDF</span>
+          </button>
+          <button 
+            onClick={handlePrint}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Print</span>
           </button>
         </div>
       </div>
