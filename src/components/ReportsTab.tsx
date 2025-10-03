@@ -192,7 +192,6 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                 </button>
               </div>
             )}
-            </div>
           </div>
         );
 
