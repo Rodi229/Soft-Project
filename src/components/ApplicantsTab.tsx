@@ -18,6 +18,10 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   const [genderFilter, setGenderFilter] = useState('All Genders');
   const [ageFilter, setAgeFilter] = useState('All Ages');
   const [educationFilter, setEducationFilter] = useState('All Education Levels');
+
+  // ✅ FIX: Define applicantCode
+  const [applicantCode, setApplicantCode] = useState('');
+
   const [formData, setFormData] = useState({
     firstName: '',
     middleName: '',
@@ -31,11 +35,23 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     beneficiaryName: '',
     status: 'PENDING' as 'PENDING' | 'APPROVED' | 'DEPLOYED' | 'COMPLETED' | 'REJECTED' | 'RESIGNED'
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const openModal = () => setShowModal(true);
+  // ✅ Code generator
+  const generateApplicantCode = () => {
+    const prefix = activeProgram === 'GIP' ? 'GIP' : 'TUP';
+    return `${prefix}-${Date.now().toString().slice(-6)}`;
+  };
+
+  const openModal = () => {
+    setApplicantCode(generateApplicantCode());
+    setShowModal(true);
+  };
+
   const closeModal = () => {
     setShowModal(false);
+    setApplicantCode('');
     setFormData({
       firstName: '',
       middleName: '',
@@ -64,7 +80,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     try {
       const age = calculateAge(formData.birthDate);
       
-      // Age validation based on program
       if (activeProgram === 'GIP' && (age < 18 || age > 29)) {
         alert('GIP applicants must be between 18-29 years old');
         setIsSubmitting(false);
@@ -77,8 +92,9 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         return;
       }
       
-      const applicantData: Omit<Applicant, 'id' | 'code' | 'dateSubmitted'> = {
+      const applicantData: Omit<Applicant, 'id' | 'dateSubmitted'> = {
         ...formData,
+        code: applicantCode,
         age,
         encoder: 'Administrator',
         program: activeProgram
@@ -99,7 +115,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Get filtered applicants based on current filters
   const filteredApplicants = getFilteredApplicants({
     searchTerm,
     status: statusFilter,
@@ -148,7 +163,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     printApplicants(exportData, activeProgram);
   };
   
-  // Dynamic colors and content based on active program
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
   const focusColor = activeProgram === 'GIP' ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-green-500 focus:border-green-500';
   const headerBgColor = activeProgram === 'GIP' ? 'bg-red-600' : 'bg-green-600';
@@ -347,7 +361,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       {showModal && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={closeModal}
         >
           <div
             className="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]"
@@ -362,9 +375,10 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Applicant Code */}
               <div>
-                <label className="block text-sm font-medium mb-1">Applicant Code</label>
+                <label className="block text-sm font-bold mb-1 uppercase">Applicant Code</label>
                 <input
                   type="text"
                   value={applicantCode}
@@ -373,47 +387,95 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 />
               </div>
 
+              {/* First Name */}
               <div>
-                <label className="block text-sm font-medium mb-1">First Name *</label>
-                <input type="text" required className="w-full border rounded-lg px-3 py-2" />
+                <label className="block text-sm font-bold mb-1 uppercase">First Name *</label>
+                <input 
+                  type="text" 
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  required 
+                  className="w-full border rounded-lg px-3 py-2" 
+                />
               </div>
 
+              {/* Middle Name */}
               <div>
-                <label className="block text-sm font-medium mb-1">Middle Name</label>
-                <input type="text" className="w-full border rounded-lg px-3 py-2" />
+                <label className="block text-sm font-bold mb-1 uppercase">Middle Name</label>
+                <input 
+                  type="text" 
+                  value={formData.middleName}
+                  onChange={(e) => handleInputChange('middleName', e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2" 
+                />
               </div>
 
+              {/* Last Name */}
               <div>
-                <label className="block text-sm font-medium mb-1">Last Name *</label>
-                <input type="text" required className="w-full border rounded-lg px-3 py-2" />
+                <label className="block text-sm font-bold mb-1 uppercase">Last Name *</label>
+                <input 
+                  type="text" 
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  required 
+                  className="w-full border rounded-lg px-3 py-2" 
+                />
               </div>
 
+              {/* Extension Name */}
               <div>
-                <label className="block text-sm font-medium mb-1">Extension Name</label>
-                <input type="text" placeholder="JR, SR, III, etc." className="w-full border rounded-lg px-3 py-2" />
+                <label className="block text-sm font-bold mb-1 uppercase">Extension Name</label>
+                <input 
+                  type="text" 
+                  value={formData.extensionName}
+                  onChange={(e) => handleInputChange('extensionName', e.target.value)}
+                  placeholder="JR, SR, III, etc." 
+                  className="w-full border rounded-lg px-3 py-2" 
+                />
               </div>
 
+              {/* Birth Date */}
               <div>
-                <label className="block text-sm font-medium mb-1">Birth Date *</label>
-                <input type="date" required className="w-full border rounded-lg px-3 py-2" />
+                <label className="block text-sm font-bold mb-1 uppercase">Birth Date *</label>
+                <input 
+                  type="date" 
+                  value={formData.birthDate}
+                  onChange={(e) => {
+                    const birthDate = e.target.value;
+                    handleInputChange('birthDate', birthDate);
+                    const calculatedAge = calculateAge(birthDate);
+                    handleInputChange('age', String(calculatedAge));
+                  }}
+                  required 
+                  className="w-full border rounded-lg px-3 py-2" 
+                />
               </div>
 
+              {/* Age */}
               <div>
-                <label className="block text-sm font-medium mb-1">Age</label>
-                <input type="number" placeholder={activeProgram === 'GIP' ? '18-29' : '18+'} className="w-full border rounded-lg px-3 py-2" />
-                <p className="text-xs text-gray-500 mt-1">
-                  {activeProgram === 'GIP' ? 'Must be 18-29 years old' : 'Must be 18 years old or above'}
-                </p>
+                <label className="block text-sm font-bold mb-1 uppercase">Age</label>
+                <input 
+                  type="number" 
+                  value={formData.age || ''} 
+                  readOnly
+                  className="w-full border rounded-lg px-3 py-2 bg-gray-100"
+                />
+                <p className="text-xs text-gray-500 mt-1">Must be 18–29 years old</p>
               </div>
 
+              {/* Barangay */}
               <div>
-                <label className="block text-sm font-medium mb-1">Barangay *</label>
-                <select className="w-full border rounded-lg px-3 py-2" required>
-                  <option>Select Barangay</option>
+                <label className="block text-sm font-bold mb-1 uppercase">Barangay *</label>
+                <select 
+                  value={formData.barangay}
+                  onChange={(e) => handleInputChange('barangay', e.target.value)}
+                  required 
+                  className="w-full border rounded-lg px-3 py-2"
+                >
+                  <option value="">Select Barangay</option>
                   <option>APLAYA</option>
                   <option>BALIBAGO</option>
                   <option>CAINGIN</option>
-                  <option>DILA</option>
                   <option>DITA</option>
                   <option>DON JOSE</option>
                   <option>IBABA</option>
@@ -431,23 +493,41 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 </select>
               </div>
 
+              {/* Contact Number */}
               <div>
-                <label className="block text-sm font-medium mb-1">Contact Number *</label>
-                <input type="text" required className="w-full border rounded-lg px-3 py-2" />
+                <label className="block text-sm font-bold mb-1 uppercase">Contact Number *</label>
+                <input 
+                  type="text" 
+                  value={formData.contactNumber}
+                  onChange={(e) => handleInputChange('contactNumber', e.target.value)}
+                  required 
+                  className="w-full border rounded-lg px-3 py-2" 
+                />
               </div>
 
+              {/* Gender */}
               <div>
-                <label className="block text-sm font-medium mb-1">Gender *</label>
-                <select className="w-full border rounded-lg px-3 py-2" required>
-                  <option>MALE</option>
-                  <option>FEMALE</option>
+                <label className="block text-sm font-bold mb-1 uppercase">Gender *</label>
+                <select 
+                  value={formData.gender}
+                  onChange={(e) => handleInputChange('gender', e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2"
+                >
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
                 </select>
               </div>
 
+              {/* Educational Attainment */}
               <div>
-                <label className="block text-sm font-medium mb-1">Educational Attainment *</label>
-                <select className="w-full border rounded-lg px-3 py-2" required>
-                  <option>Select Educational Attainment</option>
+                <label className="block text-sm font-bold mb-1 uppercase">Educational Attainment *</label>
+                <select 
+                  value={formData.educationalAttainment}
+                  onChange={(e) => handleInputChange('educationalAttainment', e.target.value)}
+                  required 
+                  className="w-full border rounded-lg px-3 py-2"
+                >
+                  <option value="">Select</option>
                   <option>JUNIOR HIGH SCHOOL GRADUATE</option>
                   <option>SENIOR HIGH SCHOOL GRADUATE</option>
                   <option>HIGH SCHOOL GRADUATE</option>
@@ -458,13 +538,20 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 </select>
               </div>
 
+              {/* Beneficiary Name */}
               <div>
-                <label className="block text-sm font-medium mb-1">Beneficiary Name</label>
-                <input type="text" className="w-full border rounded-lg px-3 py-2" />
+                <label className="block text-sm font-bold mb-1 uppercase">Beneficiary Name</label>
+                <input 
+                  type="text" 
+                  value={formData.beneficiaryName || ''} 
+                  onChange={(e) => handleInputChange('beneficiaryName', e.target.value)} 
+                  className="w-full border rounded-lg px-3 py-2" 
+                />
               </div>
 
+              {/* Resume Upload */}
               <div>
-                <label className="block text-sm font-medium mb-1">Resume Upload (PDF)</label>
+                <label className="block text-sm font-bold mb-1 uppercase">Resume Upload (PDF)</label>
                 <label className="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-50">
                   <Upload className="w-4 h-4" />
                   <span>Choose File</span>
@@ -472,14 +559,25 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 </label>
               </div>
 
+              {/* Encoder */}
               <div>
-                <label className="block text-sm font-medium mb-1">Encoder</label>
-                <input type="text" value="ADMIN" readOnly className="w-full border rounded-lg px-3 py-2 bg-gray-100" />
+                <label className="block text-sm font-bold mb-1 uppercase">Encoder</label>
+                <input 
+                  type="text" 
+                  value="ADMIN" 
+                  readOnly 
+                  className="w-full border rounded-lg px-3 py-2 bg-gray-100" 
+                />
               </div>
 
+              {/* Status */}
               <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
-                <select className="w-full border rounded-lg px-3 py-2">
+                <label className="block text-sm font-bold mb-1 uppercase">Status</label>
+                <select 
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2"
+                >
                   <option>PENDING</option>
                   <option>APPROVED</option>
                   <option>DEPLOYED</option>
@@ -489,16 +587,31 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 </select>
               </div>
 
-              <div className="col-span-2 flex justify-end space-x-3 mt-6">
+              {/* Cancel + Submit Buttons */}
+              <div className="md:col-span-3 flex justify-end mt-6 space-x-3">
                 <button
                   type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                  onClick={() => {
+                    const hasData = Object.values(formData).some(val => val !== '' && val !== null);
+                    if (hasData) {
+                      if (confirm("You have unsaved data. Are you sure you want to cancel?")) {
+                        closeModal();
+                      }
+                    } else {
+                      closeModal();
+                    }
+                  }}
+                  className="px-6 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100 transition duration-200"
                 >
                   Cancel
                 </button>
-                <button type="submit" className={`px-4 py-2 ${primaryColor.replace('hover:', '')} text-white rounded-lg hover:${primaryColor.split(' ')[1]}`}>
-                  Save Applicant
+
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className={`${primaryColor} text-white px-6 py-2 rounded-lg font-medium transition duration-200`}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Applicant'}
                 </button>
               </div>
             </form>
@@ -508,5 +621,4 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     </div>
   );
 };
-
 export default ApplicantsTab;
