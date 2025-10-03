@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Plus, Download, FileText, X, Upload } from "lucide-react";
+import { Search, Plus, Download, FileText, X, Upload, Edit, Trash2 } from "lucide-react";
 import { exportApplicantsToCSV, exportApplicantsToPDF, printApplicants } from '../utils/exportUtils';
 import { useData } from '../hooks/useData';
 import { Applicant, calculateAge } from '../utils/dataService';
@@ -9,17 +9,21 @@ interface ApplicantsTabProps {
 }
 
 const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
-  const { statistics, addApplicant, getFilteredApplicants, refreshData } = useData(activeProgram);
+  const { statistics, addApplicant, updateApplicant, deleteApplicant, getFilteredApplicants, refreshData } = useData(activeProgram);
   
   const [showModal, setShowModal] = useState(false);
+  const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [barangayFilter, setBarangayFilter] = useState('All Barangays');
   const [genderFilter, setGenderFilter] = useState('All Genders');
   const [ageFilter, setAgeFilter] = useState('All Ages');
   const [educationFilter, setEducationFilter] = useState('All Education Levels');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
 
-  // ✅ FIX: Define applicantCode
   const [applicantCode, setApplicantCode] = useState('');
 
   const [formData, setFormData] = useState({
@@ -38,12 +42,9 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ Code generator
   const generateApplicantCode = () => {
-    // Get existing applicants to determine next sequential number
     const existingApplicants = getFilteredApplicants({});
     
-    // Find the highest existing number for this program
     let maxNumber = 0;
     existingApplicants.forEach(applicant => {
       const codeMatch = applicant.code.match(new RegExp(`${activeProgram}-(\\d+)`));
@@ -55,19 +56,39 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       }
     });
     
-    // Next number is maxNumber + 1
     const nextNumber = maxNumber + 1;
     const paddedNumber = nextNumber.toString().padStart(6, '0');
     return `${activeProgram}-${paddedNumber}`;
   };
 
   const openModal = () => {
+    setEditingApplicant(null);
     setApplicantCode(generateApplicantCode());
+    setShowModal(true);
+  };
+
+  const openEditModal = (applicant: Applicant) => {
+    setEditingApplicant(applicant);
+    setApplicantCode(applicant.code);
+    setFormData({
+      firstName: applicant.firstName,
+      middleName: applicant.middleName || '',
+      lastName: applicant.lastName,
+      extensionName: applicant.extensionName || '',
+      birthDate: applicant.birthDate,
+      barangay: applicant.barangay,
+      contactNumber: applicant.contactNumber,
+      gender: applicant.gender,
+      educationalAttainment: applicant.educationalAttainment,
+      beneficiaryName: applicant.beneficiaryName || '',
+      status: applicant.status
+    });
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
+    setEditingApplicant(null);
     setApplicantCode('');
     setFormData({
       firstName: '',
@@ -109,22 +130,50 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         return;
       }
       
-      const applicantData: Omit<Applicant, 'id' | 'dateSubmitted'> = {
-        ...formData,
-        code: applicantCode,
-        age,
-        encoder: 'Administrator',
-        program: activeProgram
-      };
+      if (editingApplicant) {
+        // Update existing applicant
+        const updatedApplicant: Applicant = {
+          ...editingApplicant,
+          ...formData,
+          age,
+          code: applicantCode,
+          program: activeProgram
+        };
+        
+        await updateApplicant(updatedApplicant);
+        alert('Applicant updated successfully!');
+      } else {
+        // Add new applicant
+        const applicantData: Omit<Applicant, 'id' | 'dateSubmitted'> = {
+          ...formData,
+          code: applicantCode,
+          age,
+          encoder: 'Administrator',
+          program: activeProgram
+        };
+        
+        await addApplicant(applicantData);
+        alert('Applicant added successfully!');
+      }
       
-      await addApplicant(applicantData);
       closeModal();
-      alert('Applicant added successfully!');
     } catch (error) {
-      console.error('Error adding applicant:', error);
-      alert('Error adding applicant. Please try again.');
+      console.error('Error saving applicant:', error);
+      alert('Error saving applicant. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (applicantId: string, applicantName: string) => {
+    if (confirm(`Are you sure you want to delete ${applicantName}? This action cannot be undone.`)) {
+      try {
+        await deleteApplicant(applicantId);
+        alert('Applicant deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting applicant:', error);
+        alert('Error deleting applicant. Please try again.');
+      }
     }
   };
 
@@ -140,6 +189,18 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     ageRange: ageFilter,
     education: educationFilter
   });
+
+  // Pagination logic
+  const totalEntries = filteredApplicants.length;
+  const totalPages = Math.ceil(totalEntries / entriesPerPage);
+  const startIndex = (currentPage - 1) * entriesPerPage;
+  const endIndex = startIndex + entriesPerPage;
+  const currentEntries = filteredApplicants.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, barangayFilter, genderFilter, ageFilter, educationFilter]);
 
   const handleExportCSV = () => {
     const exportData = filteredApplicants.map(applicant => ({
@@ -205,7 +266,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-        {/* First Row - Search and 3 dropdowns */}
+        {/* First Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -258,7 +319,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <option>TAGAPO</option>
           </select>
 
-
           <select 
             value={genderFilter}
             onChange={(e) => setGenderFilter(e.target.value)}
@@ -270,7 +330,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           </select>
         </div>
 
-        {/* Second Row - Age, Education, and Export buttons */}
+        {/* Second Row */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
           <select 
             value={ageFilter}
@@ -299,11 +359,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <option>COLLEGE UNDERGRADUATE</option>
           </select>
 
-
-          {/* Empty column for spacing */}
           <div></div>
 
-          {/* Export buttons - spans 2 columns and aligned to the right */}
           <div className="md:col-span-2 flex space-x-2 justify-end">
             <button 
               onClick={handleExportCSV}
@@ -323,6 +380,31 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         </div>
       </div>
 
+      {/* Entries per page and pagination info */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600">Show</span>
+          <select
+            value={entriesPerPage}
+            onChange={(e) => {
+              setEntriesPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+          <span className="text-sm text-gray-600">entries</span>
+        </div>
+        
+        <div className="text-sm text-gray-600">
+          Showing {startIndex + 1} to {Math.min(endIndex, totalEntries)} of {totalEntries} entries
+        </div>
+      </div>
+
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className={`${headerBgColor} text-white`}>
@@ -338,13 +420,13 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           </div>
         </div>
 
-        {filteredApplicants.length === 0 ? (
+        {currentEntries.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             <div className="text-lg mb-2">No applicants found matching your criteria.</div>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {filteredApplicants.map((applicant) => (
+            {currentEntries.map((applicant) => (
               <div key={applicant.id} className="grid grid-cols-8 gap-4 px-6 py-4 hover:bg-gray-50">
                 <div className="font-medium text-sm">{applicant.code}</div>
                 <div className="text-sm">
@@ -366,8 +448,21 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   </span>
                 </div>
                 <div className="text-sm">{applicant.dateSubmitted}</div>
-                <div className="text-sm">
-                  <button className="text-blue-600 hover:text-blue-800 text-xs">Edit</button>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => openEditModal(applicant)}
+                    className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                    title="Edit applicant"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`)}
+                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                    title="Delete applicant"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -375,18 +470,50 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         )}
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-2">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => setCurrentPage(page)}
+              className={`px-3 py-2 text-sm border rounded-md ${
+                currentPage === page
+                  ? `${headerBgColor} text-white border-transparent`
+                  : 'border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+          
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       {/* Modal */}
       {showModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        >
-          <div
-            className="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]">
             {/* Header */}
             <div className={`${headerDarkBgColor} text-white px-6 py-4 flex items-center justify-between rounded-t-lg`}>
-              <h2 className="text-xl font-bold">ADD NEW {programName} APPLICANT</h2>
+              <h2 className="text-xl font-bold">
+                {editingApplicant ? `EDIT ${programName} APPLICANT` : `ADD NEW ${programName} APPLICANT`}
+              </h2>
               <button onClick={closeModal}>
                 <X className="w-5 h-5" />
               </button>
@@ -461,8 +588,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   onChange={(e) => {
                     const birthDate = e.target.value;
                     handleInputChange('birthDate', birthDate);
-                    const calculatedAge = calculateAge(birthDate);
-                    handleInputChange('age', String(calculatedAge));
                   }}
                   required 
                   className="w-full border rounded-lg px-3 py-2" 
@@ -474,11 +599,13 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 <label className="block text-sm font-bold mb-1 uppercase">Age</label>
                 <input 
                   type="number" 
-                  value={formData.age || ''} 
+                  value={formData.birthDate ? calculateAge(formData.birthDate) : ''} 
                   readOnly
                   className="w-full border rounded-lg px-3 py-2 bg-gray-100"
                 />
-                <p className="text-xs text-gray-500 mt-1">Must be 18–29 years old</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {activeProgram === 'GIP' ? 'Must be 18–29 years old' : 'Must be 18+ years old'}
+                </p>
               </div>
 
               {/* Barangay */}
@@ -494,6 +621,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   <option>APLAYA</option>
                   <option>BALIBAGO</option>
                   <option>CAINGIN</option>
+                  <option>DILA</option>
                   <option>DITA</option>
                   <option>DON JOSE</option>
                   <option>IBABA</option>
@@ -609,16 +737,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
               <div className="md:col-span-3 flex justify-end mt-6 space-x-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    const hasData = Object.values(formData).some(val => val !== '' && val !== null);
-                    if (hasData) {
-                      if (confirm("You have unsaved data. Are you sure you want to cancel?")) {
-                        closeModal();
-                      }
-                    } else {
-                      closeModal();
-                    }
-                  }}
+                  onClick={closeModal}
                   className="px-6 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100 transition duration-200"
                 >
                   Cancel
@@ -629,7 +748,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   disabled={isSubmitting}
                   className={`${primaryColor} text-white px-6 py-2 rounded-lg font-medium transition duration-200`}
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Applicant'}
+                  {isSubmitting ? 'Saving...' : (editingApplicant ? 'Update Applicant' : 'Submit Applicant')}
                 </button>
               </div>
             </form>
@@ -639,4 +758,5 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     </div>
   );
 };
+
 export default ApplicantsTab;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, PieChart, Printer, Download, FileText } from 'lucide-react';
+import { BarChart3, PieChart, Printer, Download, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { exportStatsToCSV, exportStatsToPDF, printStats, StatsData } from '../utils/exportUtils';
 import { useData } from '../hooks/useData';
 
@@ -10,6 +10,8 @@ interface ReportsTabProps {
 const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
   const { statistics, barangayStats, statusStats, genderStats, isLoading } = useData(activeProgram);
   const [selectedReportType, setSelectedReportType] = useState('summary');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
   
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
   const programName = activeProgram === 'GIP' ? 'GIP' : 'TUPAD';
@@ -54,6 +56,11 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
     { label: 'Completed', value: statistics.completed.toString(), male: '0', female: '0', color: 'text-purple-600' },
   ];
 
+  // Reset pagination when report type changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedReportType]);
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -80,66 +87,206 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
   const renderReportContent = () => {
     switch (selectedReportType) {
       case 'barangay':
+        const totalBarangayEntries = barangayStats.length;
+        const totalBarangayPages = Math.ceil(totalBarangayEntries / entriesPerPage);
+        const startBarangayIndex = (currentPage - 1) * entriesPerPage;
+        const endBarangayIndex = startBarangayIndex + entriesPerPage;
+        const currentBarangayEntries = barangayStats.slice(startBarangayIndex, endBarangayIndex);
+        
         return (
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
-              {programName} APPLICANTS BY BARANGAY
-            </h3>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">BARANGAY</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">TOTAL</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">MALE</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">FEMALE</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">PENDING</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">APPROVED</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">DEPLOYED</th>
-                    <th className="text-center py-3 px-4 font-semibold text-gray-700">COMPLETED</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {barangayStats.map((barangay, index) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{barangay.barangay}</td>
-                      <td className="py-3 px-4 text-center">{barangay.total}</td>
-                      <td className="py-3 px-4 text-center">{barangay.male}</td>
-                      <td className="py-3 px-4 text-center">{barangay.female}</td>
-                      <td className="py-3 px-4 text-center">{barangay.pending}</td>
-                      <td className="py-3 px-4 text-center">{barangay.approved}</td>
-                      <td className="py-3 px-4 text-center">{barangay.deployed}</td>
-                      <td className="py-3 px-4 text-center">{barangay.completed}</td>
+          <div className="space-y-4">
+            {/* Entries per page selector */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Show</span>
+                <select
+                  value={entriesPerPage}
+                  onChange={(e) => {
+                    setEntriesPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                </select>
+                <span className="text-sm text-gray-600">entries</span>
+              </div>
+              
+              <div className="text-sm text-gray-600">
+                Showing {startBarangayIndex + 1} to {Math.min(endBarangayIndex, totalBarangayEntries)} of {totalBarangayEntries} entries
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
+                {programName} APPLICANTS BY BARANGAY
+              </h3>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b-2 border-gray-200">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">BARANGAY</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">TOTAL</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">MALE</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">FEMALE</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">PENDING</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">APPROVED</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">DEPLOYED</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-700">COMPLETED</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {currentBarangayEntries.map((barangay, index) => (
+                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-4 font-medium">{barangay.barangay}</td>
+                        <td className="py-3 px-4 text-center">{barangay.total}</td>
+                        <td className="py-3 px-4 text-center">{barangay.male}</td>
+                        <td className="py-3 px-4 text-center">{barangay.female}</td>
+                        <td className="py-3 px-4 text-center">{barangay.pending}</td>
+                        <td className="py-3 px-4 text-center">{barangay.approved}</td>
+                        <td className="py-3 px-4 text-center">{barangay.deployed}</td>
+                        <td className="py-3 px-4 text-center">{barangay.completed}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Pagination */}
+            {totalBarangayPages > 1 && (
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
+                
+                {Array.from({ length: totalBarangayPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 text-sm border rounded-md ${
+                      currentPage === page
+                        ? 'bg-blue-600 text-white border-transparent'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalBarangayPages))}
+                  disabled={currentPage === totalBarangayPages}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             </div>
           </div>
         );
 
       case 'status':
+        const totalStatusEntries = statusStats.length;
+        const totalStatusPages = Math.ceil(totalStatusEntries / entriesPerPage);
+        const startStatusIndex = (currentPage - 1) * entriesPerPage;
+        const endStatusIndex = startStatusIndex + entriesPerPage;
+        const currentStatusEntries = statusStats.slice(startStatusIndex, endStatusIndex);
+        
         return (
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
-              {programName} APPLICANTS BY STATUS
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {statusStats.map((status, index) => (
-                <div key={index} className="text-center p-6 rounded-lg bg-gray-50 border">
-                  <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 ${status.color}`}>
-                    {status.status}
+          <div className="space-y-4">
+            {/* Entries per page selector */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Show</span>
+                <select
+                  value={entriesPerPage}
+                  onChange={(e) => {
+                    setEntriesPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                </select>
+                <span className="text-sm text-gray-600">entries</span>
+              </div>
+              
+              <div className="text-sm text-gray-600">
+                Showing {startStatusIndex + 1} to {Math.min(endStatusIndex, totalStatusEntries)} of {totalStatusEntries} entries
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
+                {programName} APPLICANTS BY STATUS
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentStatusEntries.map((status, index) => (
+                  <div key={index} className="text-center p-6 rounded-lg bg-gray-50 border">
+                    <div className={`inline-block px-4 py-2 rounded-full text-sm font-medium mb-4 ${status.color}`}>
+                      {status.status}
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 mb-2">
+                      {status.total}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      Applicants
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {status.total}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Applicants
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Pagination */}
+            {totalStatusPages > 1 && (
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
+                
+                {Array.from({ length: totalStatusPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 text-sm border rounded-md ${
+                      currentPage === page
+                        ? 'bg-blue-600 text-white border-transparent'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalStatusPages))}
+                  disabled={currentPage === totalStatusPages}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             </div>
           </div>
         );
@@ -202,31 +349,101 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
         );
 
       default:
+        const totalSummaryEntries = summaryData.length;
+        const totalSummaryPages = Math.ceil(totalSummaryEntries / entriesPerPage);
+        const startSummaryIndex = (currentPage - 1) * entriesPerPage;
+        const endSummaryIndex = startSummaryIndex + entriesPerPage;
+        const currentSummaryEntries = summaryData.slice(startSummaryIndex, endSummaryIndex);
+        
         return (
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
-              {programName} SUMMARY REPORT
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {summaryData.map((item, index) => (
-                <div key={index} className="text-center p-4 rounded-lg bg-gray-50">
-                  <h4 className="text-sm font-medium text-gray-600 mb-2">{item.label}</h4>
-                  <div className={`text-3xl font-bold mb-2 ${item.color}`}>
-                    {item.value}
-                  </div>
-                  <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
-                    <div className="flex items-center space-x-1">
-                      <span>♂</span>
-                      <span>{item.male}</span>
+          <div className="space-y-4">
+            {/* Entries per page selector */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Show</span>
+                <select
+                  value={entriesPerPage}
+                  onChange={(e) => {
+                    setEntriesPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                </select>
+                <span className="text-sm text-gray-600">entries</span>
+              </div>
+              
+              <div className="text-sm text-gray-600">
+                Showing {startSummaryIndex + 1} to {Math.min(endSummaryIndex, totalSummaryEntries)} of {totalSummaryEntries} entries
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
+                {programName} SUMMARY REPORT
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {currentSummaryEntries.map((item, index) => (
+                  <div key={index} className="text-center p-4 rounded-lg bg-gray-50">
+                    <h4 className="text-sm font-medium text-gray-600 mb-2">{item.label}</h4>
+                    <div className={`text-3xl font-bold mb-2 ${item.color}`}>
+                      {item.value}
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <span>♀</span>
-                      <span>{item.female}</span>
+                    <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <span>♂</span>
+                        <span>{item.male}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <span>♀</span>
+                        <span>{item.female}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            {/* Pagination */}
+            {totalSummaryPages > 1 && (
+              <div className="flex items-center justify-center space-x-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Previous</span>
+                </button>
+                
+                {Array.from({ length: totalSummaryPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 text-sm border rounded-md ${
+                      currentPage === page
+                        ? 'bg-blue-600 text-white border-transparent'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalSummaryPages))}
+                  disabled={currentPage === totalSummaryPages}
+                  className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             </div>
           </div>
         );
