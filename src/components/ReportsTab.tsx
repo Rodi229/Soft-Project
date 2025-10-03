@@ -261,7 +261,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                   <ChevronLeft className="w-4 h-4" />
                   <span>Previous</span>
                 </button>
-                
+
                 {Array.from({ length: totalStatusPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
@@ -275,7 +275,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                     {page}
                   </button>
                 ))}
-                
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalStatusPages))}
                   disabled={currentPage === totalStatusPages}
@@ -286,7 +286,6 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                 </button>
               </div>
             )}
-            </div>
           </div>
         );
 
@@ -418,7 +417,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                   <ChevronLeft className="w-4 h-4" />
                   <span>Previous</span>
                 </button>
-                
+
                 {Array.from({ length: totalSummaryPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
@@ -432,7 +431,7 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                     {page}
                   </button>
                 ))}
-                
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalSummaryPages))}
                   disabled={currentPage === totalSummaryPages}
@@ -443,7 +442,6 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                 </button>
               </div>
             )}
-            </div>
           </div>
         );
     }
