@@ -188,7 +188,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+        {/* First Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
@@ -206,12 +207,12 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             className={`px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ${focusColor}`}
           >
             <option>All Status</option>
-            <option>Pending</option>
-            <option>Approved</option>
-            <option>Deployed</option>
-            <option>Completed</option>
-            <option>Rejected</option>
-            <option>Resigned</option>
+            <option>PENDING</option>
+            <option>APPROVED</option>
+            <option>DEPLOYED</option>
+            <option>COMPLETED</option>
+            <option>REJECTED</option>
+            <option>RESIGNED</option>
           </select>
 
           <select 
@@ -239,9 +240,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <option>SINALHAN</option>
             <option>TAGAPO</option>
           </select>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
           <select 
             value={genderFilter}
             onChange={(e) => setGenderFilter(e.target.value)}
@@ -251,7 +251,10 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <option>MALE</option>
             <option>FEMALE</option>
           </select>
+        </div>
 
+        {/* Second Row */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
           <select 
             value={ageFilter}
             onChange={(e) => setAgeFilter(e.target.value)}
@@ -278,30 +281,36 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <option>ALS SECONDARY GRADUATE</option>
             <option>COLLEGE UNDERGRADUATE</option>
           </select>
-        </div>
 
-        <div className="flex space-x-2 mt-4">
-          <button 
-            onClick={handleExportCSV}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-          >
-            <Download className="w-4 h-4" />
-            <span>CSV</span>
-          </button>
-          <button 
-            onClick={handleExportPDF}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-          >
-            <FileText className="w-4 h-4" />
-            <span>PDF</span>
-          </button>
-          <button 
-            onClick={handlePrint}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Print</span>
-          </button>
+
+          {/* Empty columns for spacing */}
+          <div></div>
+          <div></div>
+
+          {/* Export buttons aligned to the right */}
+          <div className="flex space-x-2 justify-end">
+            <button 
+              onClick={handleExportCSV}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+            >
+              <Download className="w-4 h-4" />
+              <span>CSV</span>
+            </button>
+            <button 
+              onClick={handleExportPDF}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+            >
+              <FileText className="w-4 h-4" />
+              <span>PDF</span>
+            </button>
+            <button 
+              onClick={handlePrint}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Print</span>
+            </button>
+          </div>
         </div>
       </div>
 
