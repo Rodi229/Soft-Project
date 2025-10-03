@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Plus, Download, FileText, X, Upload, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Download, FileText, X, Upload, CreditCard as Edit, Trash2 } from "lucide-react";
 import { exportApplicantsToCSV, exportApplicantsToPDF, printApplicants } from '../utils/exportUtils';
 import { useData } from '../hooks/useData';
 import { Applicant, calculateAge } from '../utils/dataService';
