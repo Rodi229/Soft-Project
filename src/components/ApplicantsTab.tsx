@@ -40,8 +40,25 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
   // ✅ Code generator
   const generateApplicantCode = () => {
-    const prefix = activeProgram === 'GIP' ? 'GIP' : 'TUP';
-    return `${prefix}-${Date.now().toString().slice(-6)}`;
+    // Get existing applicants to determine next sequential number
+    const existingApplicants = getFilteredApplicants({});
+    
+    // Find the highest existing number for this program
+    let maxNumber = 0;
+    existingApplicants.forEach(applicant => {
+      const codeMatch = applicant.code.match(new RegExp(`${activeProgram}-(\\d+)`));
+      if (codeMatch) {
+        const number = parseInt(codeMatch[1], 10);
+        if (number > maxNumber) {
+          maxNumber = number;
+        }
+      }
+    });
+    
+    // Next number is maxNumber + 1
+    const nextNumber = maxNumber + 1;
+    const paddedNumber = nextNumber.toString().padStart(6, '0');
+    return `${activeProgram}-${paddedNumber}`;
   };
 
   const openModal = () => {

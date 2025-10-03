@@ -87,11 +87,24 @@ export const saveApplicants = (program: 'GIP' | 'TUPAD', applicants: Applicant[]
 
 // Generate next applicant code
 export const generateApplicantCode = (program: 'GIP' | 'TUPAD'): string => {
-  const counters = JSON.parse(localStorage.getItem(STORAGE_KEYS.APPLICANT_COUNTER) || '{"GIP": 0, "TUPAD": 0}');
-  counters[program] += 1;
-  localStorage.setItem(STORAGE_KEYS.APPLICANT_COUNTER, JSON.stringify(counters));
+  // Get existing applicants to determine next number
+  const existingApplicants = getApplicants(program);
   
-  const paddedNumber = counters[program].toString().padStart(6, '0');
+  // Find the highest existing number for this program
+  let maxNumber = 0;
+  existingApplicants.forEach(applicant => {
+    const codeMatch = applicant.code.match(new RegExp(`${program}-(\\d+)`));
+    if (codeMatch) {
+      const number = parseInt(codeMatch[1], 10);
+      if (number > maxNumber) {
+        maxNumber = number;
+      }
+    }
+  });
+  
+  // Next number is maxNumber + 1
+  const nextNumber = maxNumber + 1;
+  const paddedNumber = nextNumber.toString().padStart(6, '0');
   return `${program}-${paddedNumber}`;
 };
 
