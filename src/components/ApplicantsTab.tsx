@@ -188,7 +188,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
       {/* Filters */}
       <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-        {/* First Row */}
+        {/* First Row - Search and 3 dropdowns */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -253,7 +253,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           </select>
         </div>
 
-        {/* Second Row */}
+        {/* Second Row - Age, Education, and Export buttons */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
           <select 
             value={ageFilter}
@@ -283,12 +283,11 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           </select>
 
 
-          {/* Empty columns for spacing */}
-          <div></div>
+          {/* Empty column for spacing */}
           <div></div>
 
-          {/* Export buttons aligned to the right */}
-          <div className="flex space-x-2 justify-end">
+          {/* Export buttons - spans 2 columns and aligned to the right */}
+          <div className="md:col-span-2 flex space-x-2 justify-end">
             <button 
               onClick={handleExportCSV}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
@@ -302,13 +301,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             >
               <FileText className="w-4 h-4" />
               <span>PDF</span>
-            </button>
-            <button 
-              onClick={handlePrint}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-            >
-              <FileText className="w-4 h-4" />
-              <span>Print</span>
             </button>
           </div>
         </div>
