@@ -3,6 +3,8 @@ import { Search, Plus, Download, FileText, X, Upload, CreditCard as Edit, Trash2
 import { exportApplicantsToCSV, exportApplicantsToPDF, printApplicants } from '../utils/exportUtils';
 import { useData } from '../hooks/useData';
 import { Applicant, calculateAge } from '../utils/dataService';
+import Swal from "sweetalert2";
+
 
 interface ApplicantsTabProps {
   activeProgram: 'GIP' | 'TUPAD';
@@ -140,8 +142,18 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           program: activeProgram
         };
         
-        await updateApplicant(updatedApplicant);
-        alert('Applicant updated successfully!');
+      await updateApplicant(updatedApplicant);
+
+      Swal.fire({
+        icon: "success",
+        title: "Applicant Updated!",
+        text: "The applicant information has been successfully updated.",
+        confirmButtonColor: "#3085d6",
+        customClass: {
+          popup: "rounded-2xl shadow-lg",
+          confirmButton: "px-5 py-2 rounded-lg text-white font-semibold",
+        },
+      });
       } else {
         // Add new applicant
         const applicantData: Omit<Applicant, 'id' | 'dateSubmitted'> = {
@@ -507,13 +519,16 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-full max-w-4xl overflow-y-auto max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className={`${headerDarkBgColor} text-white px-6 py-4 flex items-center justify-between rounded-t-lg`}>
-              <h2 className="text-xl font-bold">
-                {editingApplicant ? `EDIT ${programName} APPLICANT` : `ADD NEW ${programName} APPLICANT`}
-              </h2>
+              <h2 className="text-xl font-bold">ADD NEW {programName} APPLICANT</h2>
               <button onClick={closeModal}>
                 <X className="w-5 h-5" />
               </button>
@@ -521,6 +536,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+
               {/* Applicant Code */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Applicant Code</label>
@@ -588,6 +604,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   onChange={(e) => {
                     const birthDate = e.target.value;
                     handleInputChange('birthDate', birthDate);
+                    const calculatedAge = calculateAge(birthDate);
+                    handleInputChange('age', String(calculatedAge));
                   }}
                   required 
                   className="w-full border rounded-lg px-3 py-2" 
@@ -599,13 +617,11 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 <label className="block text-sm font-bold mb-1 uppercase">Age</label>
                 <input 
                   type="number" 
-                  value={formData.birthDate ? calculateAge(formData.birthDate) : ''} 
+                  value={formData.age || ''} 
                   readOnly
                   className="w-full border rounded-lg px-3 py-2 bg-gray-100"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {activeProgram === 'GIP' ? 'Must be 18–29 years old' : 'Must be 18+ years old'}
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Must be 18–29 years old</p>
               </div>
 
               {/* Barangay */}
@@ -621,7 +637,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   <option>APLAYA</option>
                   <option>BALIBAGO</option>
                   <option>CAINGIN</option>
-                  <option>DILA</option>
                   <option>DITA</option>
                   <option>DON JOSE</option>
                   <option>IBABA</option>
@@ -689,8 +704,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 <label className="block text-sm font-bold mb-1 uppercase">Beneficiary Name</label>
                 <input 
                   type="text" 
-                  value={formData.beneficiaryName || ''} 
-                  onChange={(e) => handleInputChange('beneficiaryName', e.target.value)} 
+                  value={formData.beneficiaryName}
+                  onChange={(e) => handleInputChange('beneficiaryName', e.target.value)}
                   className="w-full border rounded-lg px-3 py-2" 
                 />
               </div>
@@ -700,8 +715,13 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 <label className="block text-sm font-bold mb-1 uppercase">Resume Upload (PDF)</label>
                 <label className="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-50">
                   <Upload className="w-4 h-4" />
-                  <span>Choose File</span>
-                  <input type="file" accept="application/pdf" className="hidden" />
+                  <span>{formData.resume ? formData.resume.name : 'Choose File'}</span>
+                  <input 
+                    type="file" 
+                    accept="application/pdf" 
+                    className="hidden" 
+                    onChange={(e) => handleInputChange('resume', e.target.files[0])}
+                  />
                 </label>
               </div>
 
@@ -710,8 +730,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 <label className="block text-sm font-bold mb-1 uppercase">Encoder</label>
                 <input 
                   type="text" 
-                  value="ADMIN" 
-                  readOnly 
+                  value={formData.encoder || 'ADMIN'}
+                  readOnly
                   className="w-full border rounded-lg px-3 py-2 bg-gray-100" 
                 />
               </div>
@@ -724,12 +744,12 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   onChange={(e) => handleInputChange('status', e.target.value)}
                   className="w-full border rounded-lg px-3 py-2"
                 >
-                  <option>PENDING</option>
-                  <option>APPROVED</option>
-                  <option>DEPLOYED</option>
-                  <option>COMPLETED</option>
-                  <option>REJECTED</option>
-                  <option>RESIGNED</option>
+                  <option value="PENDING">PENDING</option>
+                  <option value="APPROVED">APPROVED</option>
+                  <option value="DEPLOYED">DEPLOYED</option>
+                  <option value="COMPLETED">COMPLETED</option>
+                  <option value="REJECTED">REJECTED</option>
+                  <option value="RESIGNED">RESIGNED</option>
                 </select>
               </div>
 
@@ -737,7 +757,34 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
               <div className="md:col-span-3 flex justify-end mt-6 space-x-3">
                 <button
                   type="button"
-                  onClick={closeModal}
+                  onClick={async () => {
+                    const hasData = Object.values(formData).some(val => val !== '' && val !== null);
+
+                    if (hasData) {
+                      const result = await Swal.fire({
+                        title: "Discard Changes?",
+                        text: "You have unsaved data. Are you sure you want to cancel?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Yes, cancel it",
+                        cancelButtonText: "No, stay",
+                        reverseButtons: true,
+                        customClass: {
+                          popup: "rounded-2xl shadow-lg",
+                          confirmButton: "px-4 py-2 rounded-lg",
+                          cancelButton: "px-4 py-2 rounded-lg"
+                        }
+                      });
+
+                      if (result.isConfirmed) {
+                        closeModal();
+                      }
+                    } else {
+                      closeModal();
+                    }
+                  }}
                   className="px-6 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100 transition duration-200"
                 >
                   Cancel
@@ -748,7 +795,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   disabled={isSubmitting}
                   className={`${primaryColor} text-white px-6 py-2 rounded-lg font-medium transition duration-200`}
                 >
-                  {isSubmitting ? 'Saving...' : (editingApplicant ? 'Update Applicant' : 'Submit Applicant')}
+                  {isSubmitting ? 'Submitting...' : 'Save Applicant'}
                 </button>
               </div>
             </form>
