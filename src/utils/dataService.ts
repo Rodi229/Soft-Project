@@ -18,6 +18,14 @@ export interface Applicant {
   status: 'PENDING' | 'APPROVED' | 'DEPLOYED' | 'COMPLETED' | 'REJECTED' | 'RESIGNED';
   dateSubmitted: string;
   program: 'GIP' | 'TUPAD';
+  // TUPAD-specific fields
+  idType?: string;
+  idNumber?: string;
+  occupation?: string;
+  civilStatus?: string;
+  averageMonthlyIncome?: string;
+  dependentName?: string;
+  relationshipToDependent?: string;
 }
 
 export interface Statistics {

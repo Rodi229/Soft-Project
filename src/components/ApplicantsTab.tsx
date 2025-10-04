@@ -34,22 +34,32 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     lastName: '',
     extensionName: '',
     birthDate: '',
+    age: '',
     barangay: '',
     contactNumber: '',
     gender: 'MALE' as 'MALE' | 'FEMALE',
     educationalAttainment: '',
     beneficiaryName: '',
-    status: 'PENDING' as 'PENDING' | 'APPROVED' | 'DEPLOYED' | 'COMPLETED' | 'REJECTED' | 'RESIGNED'
+    status: 'PENDING' as 'PENDING' | 'APPROVED' | 'DEPLOYED' | 'COMPLETED' | 'REJECTED' | 'RESIGNED',
+    // TUPAD-specific fields
+    idType: '',
+    idNumber: '',
+    occupation: '',
+    civilStatus: '',
+    averageMonthlyIncome: '',
+    dependentName: '',
+    relationshipToDependent: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const generateApplicantCode = () => {
     const existingApplicants = getFilteredApplicants({});
-    
+    const prefix = activeProgram === 'GIP' ? 'GIP' : 'TPD';
+
     let maxNumber = 0;
     existingApplicants.forEach(applicant => {
-      const codeMatch = applicant.code.match(new RegExp(`${activeProgram}-(\\d+)`));
+      const codeMatch = applicant.code.match(new RegExp(`${prefix}-(\\d+)`));
       if (codeMatch) {
         const number = parseInt(codeMatch[1], 10);
         if (number > maxNumber) {
@@ -57,10 +67,10 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         }
       }
     });
-    
+
     const nextNumber = maxNumber + 1;
     const paddedNumber = nextNumber.toString().padStart(6, '0');
-    return `${activeProgram}-${paddedNumber}`;
+    return `${prefix}-${paddedNumber}`;
   };
 
   const openModal = () => {
@@ -78,12 +88,21 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       lastName: applicant.lastName,
       extensionName: applicant.extensionName || '',
       birthDate: applicant.birthDate,
+      age: applicant.age.toString(),
       barangay: applicant.barangay,
       contactNumber: applicant.contactNumber,
       gender: applicant.gender,
       educationalAttainment: applicant.educationalAttainment,
       beneficiaryName: applicant.beneficiaryName || '',
-      status: applicant.status
+      status: applicant.status,
+      // TUPAD-specific fields
+      idType: applicant.idType || '',
+      idNumber: applicant.idNumber || '',
+      occupation: applicant.occupation || '',
+      civilStatus: applicant.civilStatus || '',
+      averageMonthlyIncome: applicant.averageMonthlyIncome || '',
+      dependentName: applicant.dependentName || '',
+      relationshipToDependent: applicant.relationshipToDependent || ''
     });
     setShowModal(true);
   };
@@ -98,36 +117,57 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       lastName: '',
       extensionName: '',
       birthDate: '',
+      age: '',
       barangay: '',
       contactNumber: '',
       gender: 'MALE',
       educationalAttainment: '',
       beneficiaryName: '',
-      status: 'PENDING'
+      status: 'PENDING',
+      // TUPAD-specific fields
+      idType: '',
+      idNumber: '',
+      occupation: '',
+      civilStatus: '',
+      averageMonthlyIncome: '',
+      dependentName: '',
+      relationshipToDependent: ''
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.firstName || !formData.lastName || !formData.birthDate || !formData.barangay || !formData.contactNumber || !formData.educationalAttainment) {
+
+    // Validate common required fields
+    if (!formData.firstName || !formData.lastName || !formData.birthDate || !formData.barangay || !formData.contactNumber) {
       alert('Please fill in all required fields');
       return;
     }
-    
+
+    // Validate program-specific required fields
+    if (activeProgram === 'GIP' && !formData.educationalAttainment) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (activeProgram === 'TUPAD' && !formData.idType) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
     try {
       const age = calculateAge(formData.birthDate);
-      
+
       if (activeProgram === 'GIP' && (age < 18 || age > 29)) {
         alert('GIP applicants must be between 18-29 years old');
         setIsSubmitting(false);
         return;
       }
-      
-      if (activeProgram === 'TUPAD' && age < 18) {
-        alert('TUPAD applicants must be 18 years old or above');
+
+      if (activeProgram === 'TUPAD' && (age < 25 || age > 58)) {
+        alert('TUPAD applicants must be between 25-58 years old');
         setIsSubmitting(false);
         return;
       }
@@ -136,12 +176,30 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         // Update existing applicant
         const updatedApplicant: Applicant = {
           ...editingApplicant,
-          ...formData,
+          firstName: formData.firstName,
+          middleName: formData.middleName || undefined,
+          lastName: formData.lastName,
+          extensionName: formData.extensionName || undefined,
+          birthDate: formData.birthDate,
           age,
+          barangay: formData.barangay,
+          contactNumber: formData.contactNumber,
+          gender: formData.gender,
+          educationalAttainment: formData.educationalAttainment || '',
+          beneficiaryName: formData.beneficiaryName || undefined,
           code: applicantCode,
-          program: activeProgram
+          status: formData.status,
+          program: activeProgram,
+          // TUPAD-specific fields
+          idType: activeProgram === 'TUPAD' ? formData.idType : undefined,
+          idNumber: activeProgram === 'TUPAD' ? formData.idNumber : undefined,
+          occupation: activeProgram === 'TUPAD' ? formData.occupation : undefined,
+          civilStatus: activeProgram === 'TUPAD' ? formData.civilStatus : undefined,
+          averageMonthlyIncome: activeProgram === 'TUPAD' ? formData.averageMonthlyIncome : undefined,
+          dependentName: activeProgram === 'TUPAD' ? formData.dependentName : undefined,
+          relationshipToDependent: activeProgram === 'TUPAD' ? formData.relationshipToDependent : undefined
         };
-        
+
       await updateApplicant(updatedApplicant);
 
       Swal.fire({
@@ -157,13 +215,31 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       } else {
         // Add new applicant
         const applicantData: Omit<Applicant, 'id' | 'dateSubmitted'> = {
-          ...formData,
-          code: applicantCode,
+          firstName: formData.firstName,
+          middleName: formData.middleName || undefined,
+          lastName: formData.lastName,
+          extensionName: formData.extensionName || undefined,
+          birthDate: formData.birthDate,
           age,
+          barangay: formData.barangay,
+          contactNumber: formData.contactNumber,
+          gender: formData.gender,
+          educationalAttainment: formData.educationalAttainment || '',
+          beneficiaryName: formData.beneficiaryName || undefined,
+          code: applicantCode,
           encoder: 'Administrator',
-          program: activeProgram
+          status: formData.status,
+          program: activeProgram,
+          // TUPAD-specific fields
+          idType: activeProgram === 'TUPAD' ? formData.idType : undefined,
+          idNumber: activeProgram === 'TUPAD' ? formData.idNumber : undefined,
+          occupation: activeProgram === 'TUPAD' ? formData.occupation : undefined,
+          civilStatus: activeProgram === 'TUPAD' ? formData.civilStatus : undefined,
+          averageMonthlyIncome: activeProgram === 'TUPAD' ? formData.averageMonthlyIncome : undefined,
+          dependentName: activeProgram === 'TUPAD' ? formData.dependentName : undefined,
+          relationshipToDependent: activeProgram === 'TUPAD' ? formData.relationshipToDependent : undefined
         };
-        
+
         await addApplicant(applicantData);
         alert('Applicant added successfully!');
       }
@@ -551,55 +627,55 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
               {/* First Name */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">First Name *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  required 
-                  className="w-full border rounded-lg px-3 py-2" 
+                  required
+                  className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
 
               {/* Middle Name */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Middle Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.middleName}
                   onChange={(e) => handleInputChange('middleName', e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2" 
+                  className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
 
               {/* Last Name */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Last Name *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  required 
-                  className="w-full border rounded-lg px-3 py-2" 
+                  required
+                  className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
 
               {/* Extension Name */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Extension Name</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.extensionName}
                   onChange={(e) => handleInputChange('extensionName', e.target.value)}
-                  placeholder="JR, SR, III, etc." 
-                  className="w-full border rounded-lg px-3 py-2" 
+                  placeholder="JR, SR, III, etc."
+                  className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
 
               {/* Birth Date */}
               <div>
-                <label className="block text-sm font-bold mb-1 uppercase">Birth Date *</label>
-                <input 
-                  type="date" 
+                <label className="block text-sm font-bold mb-1 uppercase">Birth Date * (YYYY/MM/DD)</label>
+                <input
+                  type="date"
                   value={formData.birthDate}
                   onChange={(e) => {
                     const birthDate = e.target.value;
@@ -607,33 +683,35 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                     const calculatedAge = calculateAge(birthDate);
                     handleInputChange('age', String(calculatedAge));
                   }}
-                  required 
-                  className="w-full border rounded-lg px-3 py-2" 
+                  required
+                  className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
 
               {/* Age */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Age</label>
-                <input 
-                  type="number" 
-                  value={formData.age || ''} 
+                <input
+                  type="number"
+                  value={formData.age || ''}
                   readOnly
                   className="w-full border rounded-lg px-3 py-2 bg-gray-100"
                 />
-                <p className="text-xs text-gray-500 mt-1">Must be 18–29 years old</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {activeProgram === 'GIP' ? 'Must be 18–29 years old' : 'Must be 25-58 years old'}
+                </p>
               </div>
 
               {/* Barangay */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Barangay *</label>
-                <select 
+                <select
                   value={formData.barangay}
                   onChange={(e) => handleInputChange('barangay', e.target.value)}
-                  required 
+                  required
                   className="w-full border rounded-lg px-3 py-2"
                 >
-                  <option value="">Select Barangay</option>
+                  <option value="">SELECT BARANGAY</option>
                   <option>APLAYA</option>
                   <option>BALIBAGO</option>
                   <option>CAINGIN</option>
@@ -657,89 +735,179 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
               {/* Contact Number */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Contact Number *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={formData.contactNumber}
                   onChange={(e) => handleInputChange('contactNumber', e.target.value)}
-                  required 
-                  className="w-full border rounded-lg px-3 py-2" 
+                  required
+                  className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
 
               {/* Gender */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Gender *</label>
-                <select 
+                <select
                   value={formData.gender}
                   onChange={(e) => handleInputChange('gender', e.target.value)}
                   className="w-full border rounded-lg px-3 py-2"
                 >
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
+                  <option value="MALE">MALE</option>
+                  <option value="FEMALE">FEMALE</option>
                 </select>
               </div>
 
-              {/* Educational Attainment */}
-              <div>
-                <label className="block text-sm font-bold mb-1 uppercase">Educational Attainment *</label>
-                <select 
-                  value={formData.educationalAttainment}
-                  onChange={(e) => handleInputChange('educationalAttainment', e.target.value)}
-                  required 
-                  className="w-full border rounded-lg px-3 py-2"
-                >
-                  <option value="">Select</option>
-                  <option>JUNIOR HIGH SCHOOL GRADUATE</option>
-                  <option>SENIOR HIGH SCHOOL GRADUATE</option>
-                  <option>HIGH SCHOOL GRADUATE</option>
-                  <option>COLLEGE GRADUATE</option>
-                  <option>TECHNICAL/VOCATIONAL COURSE GRADUATE</option>
-                  <option>ALS SECONDARY GRADUATE</option>
-                  <option>COLLEGE UNDERGRADUATE</option>
-                </select>
-              </div>
+              {/* TUPAD-specific fields */}
+              {activeProgram === 'TUPAD' && (
+                <>
+                  {/* Type of ID Submitted */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Type of ID Submitted *</label>
+                    <select
+                      value={formData.idType}
+                      onChange={(e) => handleInputChange('idType', e.target.value)}
+                      required
+                      className="w-full border rounded-lg px-3 py-2"
+                    >
+                      <option value="">SELECT ID TYPE</option>
+                      <option>PHILSYS ID</option>
+                      <option>DRIVER'S LICENSE</option>
+                      <option>SSS ID</option>
+                      <option>UMID</option>
+                      <option>PASSPORT</option>
+                      <option>VOTER'S ID</option>
+                      <option>POSTAL ID</option>
+                      <option>PRC ID</option>
+                      <option>SENIOR CITIZEN ID</option>
+                      <option>PWD ID</option>
+                    </select>
+                  </div>
 
-              {/* Beneficiary Name */}
-              <div>
-                <label className="block text-sm font-bold mb-1 uppercase">Beneficiary Name</label>
-                <input 
-                  type="text" 
-                  value={formData.beneficiaryName}
-                  onChange={(e) => handleInputChange('beneficiaryName', e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2" 
-                />
-              </div>
+                  {/* ID Number */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">ID Number</label>
+                    <input
+                      type="text"
+                      value={formData.idNumber}
+                      onChange={(e) => handleInputChange('idNumber', e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
 
-              {/* Resume Upload */}
-              <div>
-                <label className="block text-sm font-bold mb-1 uppercase">Resume Upload (PDF)</label>
-                <label className="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-50">
-                  <Upload className="w-4 h-4" />
-                  <span>{formData.resume ? formData.resume.name : 'Choose File'}</span>
-                  <input 
-                    type="file" 
-                    accept="application/pdf" 
-                    className="hidden" 
-                    onChange={(e) => handleInputChange('resume', e.target.files[0])}
-                  />
-                </label>
-              </div>
+                  {/* Occupation */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Occupation</label>
+                    <input
+                      type="text"
+                      value={formData.occupation}
+                      onChange={(e) => handleInputChange('occupation', e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
+
+                  {/* Civil Status */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Civil Status</label>
+                    <select
+                      value={formData.civilStatus}
+                      onChange={(e) => handleInputChange('civilStatus', e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2"
+                    >
+                      <option value="">SELECT CIVIL STATUS</option>
+                      <option>SINGLE</option>
+                      <option>MARRIED</option>
+                      <option>WIDOWED</option>
+                      <option>SEPARATED</option>
+                      <option>DIVORCED</option>
+                    </select>
+                  </div>
+
+                  {/* Average Monthly Income */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Average Monthly Income</label>
+                    <input
+                      type="text"
+                      value={formData.averageMonthlyIncome}
+                      onChange={(e) => handleInputChange('averageMonthlyIncome', e.target.value)}
+                      placeholder="₱"
+                      className="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
+
+                  {/* Dependent Name */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Dependent Name</label>
+                    <input
+                      type="text"
+                      value={formData.dependentName}
+                      onChange={(e) => handleInputChange('dependentName', e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
+
+                  {/* Relationship to Dependent */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Relationship to Dependent</label>
+                    <input
+                      type="text"
+                      value={formData.relationshipToDependent}
+                      onChange={(e) => handleInputChange('relationshipToDependent', e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Educational Attainment - Only for GIP */}
+              {activeProgram === 'GIP' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Educational Attainment *</label>
+                    <select
+                      value={formData.educationalAttainment}
+                      onChange={(e) => handleInputChange('educationalAttainment', e.target.value)}
+                      required
+                      className="w-full border rounded-lg px-3 py-2"
+                    >
+                      <option value="">Select</option>
+                      <option>JUNIOR HIGH SCHOOL GRADUATE</option>
+                      <option>SENIOR HIGH SCHOOL GRADUATE</option>
+                      <option>HIGH SCHOOL GRADUATE</option>
+                      <option>COLLEGE GRADUATE</option>
+                      <option>TECHNICAL/VOCATIONAL COURSE GRADUATE</option>
+                      <option>ALS SECONDARY GRADUATE</option>
+                      <option>COLLEGE UNDERGRADUATE</option>
+                    </select>
+                  </div>
+
+                  {/* Beneficiary Name */}
+                  <div>
+                    <label className="block text-sm font-bold mb-1 uppercase">Beneficiary Name</label>
+                    <input
+                      type="text"
+                      value={formData.beneficiaryName}
+                      onChange={(e) => handleInputChange('beneficiaryName', e.target.value)}
+                      className="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Encoder */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Encoder</label>
-                <input 
-                  type="text" 
-                  value={formData.encoder || 'ADMIN'}
+                <input
+                  type="text"
+                  value="ADMIN"
                   readOnly
-                  className="w-full border rounded-lg px-3 py-2 bg-gray-100" 
+                  className="w-full border rounded-lg px-3 py-2 bg-gray-100"
                 />
               </div>
 
               {/* Status */}
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Status</label>
-                <select 
+                <select
                   value={formData.status}
                   onChange={(e) => handleInputChange('status', e.target.value)}
                   className="w-full border rounded-lg px-3 py-2"
