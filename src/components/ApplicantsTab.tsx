@@ -266,6 +266,17 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   };
 
   const handleInputChange = (field: string, value: string) => {
+    // Auto-capitalize text inputs (except for numbers and dates)
+    const fieldsToCapitalize = [
+      'firstName', 'middleName', 'lastName', 'extensionName',
+      'barangay', 'idNumber', 'occupation', 'dependentName',
+      'relationshipToDependent', 'beneficiaryName'
+    ];
+
+    if (fieldsToCapitalize.includes(field) && typeof value === 'string') {
+      value = value.toUpperCase();
+    }
+
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -632,7 +643,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
                   required
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-2 uppercase"
+                  style={{ textTransform: 'uppercase' }}
                 />
               </div>
 
@@ -643,7 +655,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   type="text"
                   value={formData.middleName}
                   onChange={(e) => handleInputChange('middleName', e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-2 uppercase"
+                  style={{ textTransform: 'uppercase' }}
                 />
               </div>
 
@@ -655,7 +668,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
                   required
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-2 uppercase"
+                  style={{ textTransform: 'uppercase' }}
                 />
               </div>
 
@@ -667,7 +681,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   value={formData.extensionName}
                   onChange={(e) => handleInputChange('extensionName', e.target.value)}
                   placeholder="JR, SR, III, etc."
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border rounded-lg px-3 py-2 uppercase"
+                  style={{ textTransform: 'uppercase' }}
                 />
               </div>
 
@@ -790,7 +805,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                       type="text"
                       value={formData.idNumber}
                       onChange={(e) => handleInputChange('idNumber', e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
+                      className="w-full border rounded-lg px-3 py-2 uppercase"
+                      style={{ textTransform: 'uppercase' }}
                     />
                   </div>
 
@@ -801,7 +817,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                       type="text"
                       value={formData.occupation}
                       onChange={(e) => handleInputChange('occupation', e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
+                      className="w-full border rounded-lg px-3 py-2 uppercase"
+                      style={{ textTransform: 'uppercase' }}
                     />
                   </div>
 
@@ -841,7 +858,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                       type="text"
                       value={formData.dependentName}
                       onChange={(e) => handleInputChange('dependentName', e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
+                      className="w-full border rounded-lg px-3 py-2 uppercase"
+                      style={{ textTransform: 'uppercase' }}
                     />
                   </div>
 
@@ -852,7 +870,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                       type="text"
                       value={formData.relationshipToDependent}
                       onChange={(e) => handleInputChange('relationshipToDependent', e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
+                      className="w-full border rounded-lg px-3 py-2 uppercase"
+                      style={{ textTransform: 'uppercase' }}
                     />
                   </div>
                 </>
@@ -887,7 +906,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                       type="text"
                       value={formData.beneficiaryName}
                       onChange={(e) => handleInputChange('beneficiaryName', e.target.value)}
-                      className="w-full border rounded-lg px-3 py-2"
+                      className="w-full border rounded-lg px-3 py-2 uppercase"
+                      style={{ textTransform: 'uppercase' }}
                     />
                   </div>
                 </>
