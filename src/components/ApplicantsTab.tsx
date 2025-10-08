@@ -140,18 +140,45 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
     // Validate common required fields
     if (!formData.firstName || !formData.lastName || !formData.birthDate || !formData.barangay || !formData.contactNumber) {
-      alert('Please fill in all required fields');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Missing Required Fields',
+        text: 'Please fill in all required fields',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'rounded-2xl shadow-lg',
+          confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+        }
+      });
       return;
     }
 
     // Validate program-specific required fields
     if (activeProgram === 'GIP' && !formData.educationalAttainment) {
-      alert('Please fill in all required fields');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Missing Required Fields',
+        text: 'Please fill in all required fields',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'rounded-2xl shadow-lg',
+          confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+        }
+      });
       return;
     }
 
     if (activeProgram === 'TUPAD' && !formData.idType) {
-      alert('Please fill in all required fields');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Missing Required Fields',
+        text: 'Please fill in all required fields',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'rounded-2xl shadow-lg',
+          confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+        }
+      });
       return;
     }
 
@@ -161,13 +188,31 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       const age = calculateAge(formData.birthDate);
 
       if (activeProgram === 'GIP' && (age < 18 || age > 29)) {
-        alert('GIP applicants must be between 18-29 years old');
+        await Swal.fire({
+          icon: 'error',
+          title: 'Age Requirement Not Met',
+          text: 'GIP applicants must be between 18-29 years old',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-2xl shadow-lg',
+            confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+          }
+        });
         setIsSubmitting(false);
         return;
       }
 
       if (activeProgram === 'TUPAD' && (age < 25 || age > 58)) {
-        alert('TUPAD applicants must be between 25-58 years old');
+        await Swal.fire({
+          icon: 'error',
+          title: 'Age Requirement Not Met',
+          text: 'TUPAD applicants must be between 25-58 years old',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-2xl shadow-lg',
+            confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+          }
+        });
         setIsSubmitting(false);
         return;
       }
@@ -241,26 +286,79 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         };
 
         await addApplicant(applicantData);
-        alert('Applicant added successfully!');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Applicant Added!',
+          text: 'The applicant has been successfully added to the system.',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-2xl shadow-lg',
+            confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+          }
+        });
       }
       
       closeModal();
     } catch (error) {
       console.error('Error saving applicant:', error);
-      alert('Error saving applicant. Please try again.');
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error saving applicant. Please try again.',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'rounded-2xl shadow-lg',
+          confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+        }
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (applicantId: string, applicantName: string) => {
-    if (confirm(`Are you sure you want to delete ${applicantName}? This action cannot be undone.`)) {
+    const result = await Swal.fire({
+      title: 'Delete Applicant?',
+      text: `Are you sure you want to delete ${applicantName}? This action cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'rounded-2xl shadow-lg',
+        confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold',
+        cancelButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+      }
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteApplicant(applicantId);
-        alert('Applicant deleted successfully!');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'The applicant has been successfully deleted.',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-2xl shadow-lg',
+            confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+          }
+        });
       } catch (error) {
         console.error('Error deleting applicant:', error);
-        alert('Error deleting applicant. Please try again.');
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error deleting applicant. Please try again.',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-2xl shadow-lg',
+            confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+          }
+        });
       }
     }
   };
