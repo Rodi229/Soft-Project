@@ -646,20 +646,48 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 </div>
                 <div className="text-sm">{applicant.dateSubmitted}</div>
                 <div className="flex items-center space-x-2">
-                  <button 
-                    onClick={() => openEditModal(applicant)}
-                    className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
-                    title="Edit applicant"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`)}
-                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
-                    title="Delete applicant"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {showArchived ? (
+                    <>
+                      <button
+                        onClick={() => handleUnarchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`)}
+                        className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors duration-200"
+                        title="Restore applicant"
+                      >
+                        <ArchiveRestore className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`)}
+                        className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                        title="Delete permanently"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => openEditModal(applicant)}
+                        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                        title="Edit applicant"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleArchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`)}
+                        className="p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-md transition-colors duration-200"
+                        title="Archive applicant"
+                      >
+                        <Archive className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`)}
+                        className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                        title="Delete applicant"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
