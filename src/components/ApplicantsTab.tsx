@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Plus, Download, FileText, X, Upload, CreditCard as Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Download, FileText, X, Upload, CreditCard as Edit, Trash2, Archive, ArchiveRestore } from "lucide-react";
 import { exportApplicantsToCSV, exportApplicantsToPDF, printApplicants } from '../utils/exportUtils';
 import { useData } from '../hooks/useData';
 import { Applicant, calculateAge } from '../utils/dataService';
@@ -21,7 +21,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   const [genderFilter, setGenderFilter] = useState('All Genders');
   const [ageFilter, setAgeFilter] = useState('All Ages');
   const [educationFilter, setEducationFilter] = useState('All Education Levels');
-  
+  const [showArchived, setShowArchived] = useState(false);
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
@@ -316,6 +317,118 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     }
   };
 
+  const handleArchive = async (applicantId: string, applicantName: string) => {
+    const result = await Swal.fire({
+      title: 'Archive Applicant?',
+      text: `Are you sure you want to archive ${applicantName}? You can restore them later from the archive.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, archive it',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'rounded-2xl shadow-lg',
+        confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold',
+        cancelButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+      }
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const applicants = getFilteredApplicants({});
+        const applicant = applicants.find(a => a.id === applicantId);
+        if (applicant) {
+          await updateApplicant(applicantId, {
+            ...applicant,
+            archived: true,
+            archivedDate: new Date().toISOString().split('T')[0]
+          });
+          await refreshData();
+          await Swal.fire({
+            icon: 'success',
+            title: 'Archived!',
+            text: 'The applicant has been successfully archived.',
+            confirmButtonColor: '#3085d6',
+            customClass: {
+              popup: 'rounded-2xl shadow-lg',
+              confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error archiving applicant:', error);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error archiving applicant. Please try again.',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-2xl shadow-lg',
+            confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+          }
+        });
+      }
+    }
+  };
+
+  const handleUnarchive = async (applicantId: string, applicantName: string) => {
+    const result = await Swal.fire({
+      title: 'Restore Applicant?',
+      text: `Are you sure you want to restore ${applicantName} from the archive?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, restore it',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'rounded-2xl shadow-lg',
+        confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold',
+        cancelButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+      }
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const applicants = getFilteredApplicants({});
+        const applicant = applicants.find(a => a.id === applicantId);
+        if (applicant) {
+          await updateApplicant(applicantId, {
+            ...applicant,
+            archived: false,
+            archivedDate: undefined
+          });
+          await refreshData();
+          await Swal.fire({
+            icon: 'success',
+            title: 'Restored!',
+            text: 'The applicant has been successfully restored.',
+            confirmButtonColor: '#3085d6',
+            customClass: {
+              popup: 'rounded-2xl shadow-lg',
+              confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error restoring applicant:', error);
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error restoring applicant. Please try again.',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-2xl shadow-lg',
+            confirmButton: 'px-5 py-2 rounded-lg text-white font-semibold'
+          }
+        });
+      }
+    }
+  };
+
   const handleDelete = async (applicantId: string, applicantName: string) => {
     const result = await Swal.fire({
       title: 'Delete Applicant?',
@@ -385,7 +498,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     gender: genderFilter,
     ageRange: ageFilter,
     education: educationFilter
-  });
+  }).filter(applicant => showArchived ? applicant.archived : !applicant.archived);
 
   // Pagination logic
   const totalEntries = filteredApplicants.length;
@@ -397,7 +510,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   // Reset to page 1 when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, barangayFilter, genderFilter, ageFilter, educationFilter]);
+  }, [searchTerm, statusFilter, barangayFilter, genderFilter, ageFilter, educationFilter, showArchived]);
 
   const handleExportCSV = () => {
     const exportData = filteredApplicants.map(applicant => ({
@@ -449,16 +562,41 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{programName} APPLICANTS</h1>
-          <p className="text-gray-600">Total: {statistics.totalApplicants} applicants</p>
+          <h1 className="text-2xl font-bold text-gray-900">{programName} APPLICANTS{showArchived ? ' - ARCHIVE' : ''}</h1>
+          <p className="text-gray-600">
+            {showArchived
+              ? `Archived: ${totalEntries} of ${statistics.totalApplicants} applicants`
+              : `Total: ${statistics.totalApplicants} applicants`
+            }
+          </p>
         </div>
-        <button
-          onClick={openModal}
-          className={`${primaryColor} text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200`}
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Applicant</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+          >
+            {showArchived ? (
+              <>
+                <ArchiveRestore className="w-4 h-4" />
+                <span>View Active</span>
+              </>
+            ) : (
+              <>
+                <Archive className="w-4 h-4" />
+                <span>View Archive</span>
+              </>
+            )}
+          </button>
+          {!showArchived && (
+            <button
+              onClick={openModal}
+              className={`${primaryColor} text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add New Applicant</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
