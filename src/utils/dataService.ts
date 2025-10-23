@@ -316,8 +316,8 @@ export const initializeSampleData = (): void => {
   if (getApplicants('GIP').length === 0 && getApplicants('TUPAD').length === 0) {
     // Add a few sample applicants for demonstration
     const sampleGIPApplicant: Omit<Applicant, 'id' | 'code' | 'dateSubmitted'> = {
-      firstName: 'Juan',
-      lastName: 'Dela Cruz',
+      firstName: 'JUAN',
+      lastName: 'DELA CRUZ',
       birthDate: '2000-01-15',
       age: 24,
       barangay: 'BALIBAGO',
@@ -330,8 +330,8 @@ export const initializeSampleData = (): void => {
     };
     
     const sampleTUPADApplicant: Omit<Applicant, 'id' | 'code' | 'dateSubmitted'> = {
-      firstName: 'Maria',
-      lastName: 'Santos',
+      firstName: 'MARIA',
+      lastName: 'SANTOS',
       birthDate: '1995-05-20',
       age: 29,
       barangay: 'DITA',

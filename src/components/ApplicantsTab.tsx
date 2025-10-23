@@ -995,6 +995,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   <option>BALIBAGO</option>
                   <option>CAINGIN</option>
                   <option>DITA</option>
+                  <option>DILA</option>
                   <option>DON JOSE</option>
                   <option>IBABA</option>
                   <option>KANLURAN</option>
