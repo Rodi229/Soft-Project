@@ -47,12 +47,12 @@ export const exportStatsToCSV = (stats: StatsData, program: 'GIP' | 'TUPAD') => 
   const csvContent = [
     headers.join(','),
     `Total Applicants,${stats.totalApplicants},${stats.maleCount},${stats.femaleCount}`,
-    `Pending,${stats.pending},0,0`,
-    `Approved,${stats.approved},0,0`,
-    `Deployed,${stats.deployed},0,0`,
-    `Completed,${stats.completed},0,0`,
-    `Rejected,${stats.rejected},0,0`,
-    `Resigned,${stats.resigned},0,0`,
+    `Pending,${stats.pending},${stats.maleCount},${stats.femaleCount}`,
+    `Approved,${stats.approved},${stats.maleCount},${stats.femaleCount}`,
+    `Deployed,${stats.deployed},${stats.maleCount},${stats.femaleCount}`,
+    `Completed,${stats.completed},${stats.maleCount},${stats.femaleCount}`,
+    `Rejected,${stats.rejected},${stats.maleCount},${stats.femaleCount}`,
+    `Resigned,${stats.resigned},${stats.maleCount},${stats.femaleCount}`,
     `Barangays Covered,${stats.barangaysCovered},N/A,N/A`
   ].join('\n');
 
@@ -129,7 +129,7 @@ export const exportApplicantsToPDF = (applicants: ApplicantData[], program: 'GIP
           </tbody>
         </table>
         <div class="footer">
-          <p>© 2024 City Government of Santa Rosa - Office of the City Mayor</p>
+          <p>© 2025 City Government of Santa Rosa - Office of the City Mayor</p>
           <p>Total Records: ${applicants.length}</p>
         </div>
       </body>
@@ -200,7 +200,7 @@ export const exportStatsToPDF = (stats: StatsData, program: 'GIP' | 'TUPAD') => 
           </div>
         </div>
         <div class="footer">
-          <p>© 2024 City Government of Santa Rosa - Office of the City Mayor</p>
+          <p>© 2025 City Government of Santa Rosa - Office of the City Mayor</p>
           <p>Report generated with current system data</p>
         </div>
       </body>
@@ -284,7 +284,7 @@ export const printApplicants = (applicants: ApplicantData[], program: 'GIP' | 'T
           </tbody>
         </table>
         <div class="footer">
-          <p>© 2024 City Government of Santa Rosa - Office of the City Mayor</p>
+          <p>© 2025 City Government of Santa Rosa - Office of the City Mayor</p>
           <p>Total Records: ${applicants.length}</p>
         </div>
       </body>
@@ -368,7 +368,7 @@ export const printStats = (stats: StatsData, program: 'GIP' | 'TUPAD') => {
           </div>
         </div>
         <div class="footer">
-          <p>© 2024 City Government of Santa Rosa - Office of the City Mayor</p>
+          <p>© 2025 City Government of Santa Rosa - Office of the City Mayor</p>
           <p>Report generated with current system data</p>
         </div>
       </body>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
 import SantaRosaLogo from "../assets/SantaRosa.png";
+import SantaRosaArch from "../assets/SantaRosaArch.png";
 
 interface LoginPageProps {
   onLogin: (username: string, password: string) => Promise<boolean>;
@@ -26,14 +27,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       general: ''
     };
 
-    // Username validation
     if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
     } else if (formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
@@ -46,17 +45,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+
+    if (!validateForm()) return;
 
     setIsLoading(true);
     setErrors(prev => ({ ...prev, general: '' }));
 
     try {
       const success = await onLogin(formData.username, formData.password);
-      
       if (!success) {
         setErrors(prev => ({
           ...prev,
@@ -75,19 +71,24 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear field-specific error when user starts typing
     if (errors[field as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-600 via-orange-700 to-yellow-600 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Login Card */}
+    <div
+      className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center relative"
+      style={{
+        backgroundImage: `url(${SantaRosaArch})`
+      }}
+    >
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-orange-700 opacity-80"></div>
+
+      {/* Content */}
+      <div className="relative w-full max-w-md z-10">
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Logo and Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
               <img
@@ -101,16 +102,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             <p className="text-gray-500 text-xs">City Government of Santa Rosa</p>
           </div>
 
-          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* General Error Message */}
             {errors.general && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                 <p className="text-red-600 text-sm text-center">{errors.general}</p>
               </div>
             )}
 
-            {/* Username Field */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
                 Username
@@ -126,8 +124,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   onChange={(e) => handleInputChange('username', e.target.value)}
                   placeholder="Enter username"
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
-                    errors.username 
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                    errors.username
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300'
                   }`}
                   disabled={isLoading}
@@ -138,7 +136,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               )}
             </div>
 
-            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -154,8 +151,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   placeholder="Enter password"
                   className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
-                    errors.password 
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                    errors.password
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300'
                   }`}
                   disabled={isLoading}
@@ -178,7 +175,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               )}
             </div>
 
-            {/* Sign In Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -195,10 +191,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-500">
-              © 2024 City Government of Santa Rosa
+              © 2025 City Government of Santa Rosa
             </p>
             <p className="text-xs text-gray-500">
               Office of the City Mayor

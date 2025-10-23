@@ -563,12 +563,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{programName} APPLICANTS{showArchived ? ' - ARCHIVE' : ''}</h1>
-          <p className="text-gray-600">
-            {showArchived
-              ? `Archived: ${totalEntries} of ${statistics.totalApplicants} applicants`
-              : `Total: ${statistics.totalApplicants} applicants`
-            }
-          </p>
         </div>
         <div className="flex items-center space-x-3">
           <button
@@ -750,14 +744,14 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <div>BARANGAY</div>
             <div>GENDER</div>
             <div>STATUS</div>
-            <div>DATE SUBMITTED ↑</div>
+            <div>DATE SUBMITTED</div>
             <div>ACTIONS</div>
           </div>
         </div>
 
         {currentEntries.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <div className="text-lg mb-2">No applicants found matching your criteria.</div>
+          <div className="p-3 text-center text-gray-500">
+            <div className="text-lg mb-2">No applicants found.</div>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -937,9 +931,9 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 />
               </div>
 
-              {/* Extension Name */}
+              {/*  Name */}
               <div>
-                <label className="block text-sm font-bold mb-1 uppercase">Extension Name</label>
+                <label className="block text-sm font-bold mb-1 uppercase">Suffix</label>
                 <input
                   type="text"
                   value={formData.extensionName}
@@ -1178,15 +1172,17 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 </>
               )}
 
-              {/* Encoder */}
+              {/* Upload Resume */}
               <div>
-                <label className="block text-sm font-bold mb-1 uppercase">Encoder</label>
+                <label className="block text-sm font-bold mb-1 uppercase">Upload Resume</label>
                 <input
-                  type="text"
-                  value="ADMIN"
-                  readOnly
-                  className="w-full border rounded-lg px-3 py-2 bg-gray-100"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => handleInputChange('resumeFile', e.target.files?.[0] || null)}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 bg-white cursor-pointer file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-md file:bg-yellow-400 file:text-black file:font-medium hover:file:bg-yellow-500 transition"
                 />
+                <p className="text-xs text-gray-500 mt-1">Accepted formats: PDF, DOC, DOCX</p>
               </div>
 
               {/* Status */}
@@ -1204,6 +1200,17 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   <option value="REJECTED">REJECTED</option>
                   <option value="RESIGNED">RESIGNED</option>
                 </select>
+              </div>
+
+              {/* Encoder */}
+              <div>
+                <label className="block text-sm font-bold mb-1 uppercase">Encoder</label>
+                <input
+                  type="text"
+                  value="ADMIN"
+                  readOnly
+                  className="w-full border rounded-lg px-3 py-2 bg-gray-100"
+                />
               </div>
 
               {/* Cancel + Submit Buttons */}

@@ -27,8 +27,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
     {
       title: 'PENDING',
       value: statistics.pending.toString(),
-      male: '0', // Will be calculated from filtered data
-      female: '0', // Will be calculated from filtered data
+      male: statistics.maleCount.toString(),
+      female: statistics.femaleCount.toString(),
       icon: Clock,
       bgColor: secondaryColor,
       iconBg: secondaryDarkColor,
@@ -36,8 +36,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
     {
       title: 'APPROVED',
       value: statistics.approved.toString(),
-      male: '0', // Will be calculated from filtered data
-      female: '0', // Will be calculated from filtered data
+      male: statistics.maleCount.toString(),
+      female: statistics.femaleCount.toString(),
       icon: UserCheck,
       bgColor: 'bg-blue-500',
       iconBg: 'bg-blue-600',
@@ -45,8 +45,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
     {
       title: 'DEPLOYED',
       value: statistics.deployed.toString(),
-      male: '0', // Will be calculated from filtered data
-      female: '0', // Will be calculated from filtered data
+      male: statistics.maleCount.toString(),
+      female: statistics.femaleCount.toString(),
       icon: CheckCircle,
       bgColor: 'bg-green-500',
       iconBg: 'bg-green-600',
@@ -54,8 +54,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
     {
       title: 'COMPLETED',
       value: statistics.completed.toString(),
-      male: '0', // Will be calculated from filtered data
-      female: '0', // Will be calculated from filtered data
+      male: statistics.maleCount.toString(),
+      female: statistics.femaleCount.toString(),
       icon: CheckCircle,
       bgColor: 'bg-pink-400',
       iconBg: 'bg-pink-500',
@@ -63,8 +63,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
     {
       title: 'REJECTED',
       value: statistics.rejected.toString(),
-      male: '0', // Will be calculated from filtered data
-      female: '0', // Will be calculated from filtered data
+      male: statistics.maleCount.toString(),
+      female: statistics.femaleCount.toString(),
       icon: X,
       bgColor: 'bg-orange-500',
       iconBg: 'bg-orange-600',
@@ -72,8 +72,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
     {
       title: 'RESIGNED',
       value: statistics.resigned.toString(),
-      male: '0', // Will be calculated from filtered data
-      female: '0', // Will be calculated from filtered data
+      male: statistics.maleCount.toString(),
+      female: statistics.femaleCount.toString(),
       icon: UserMinus,
       bgColor: 'bg-gray-500',
       iconBg: 'bg-gray-600',

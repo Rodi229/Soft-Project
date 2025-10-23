@@ -113,10 +113,6 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
                 </select>
                 <span className="text-sm text-gray-600">entries</span>
               </div>
-              
-              <div className="text-sm text-gray-600">
-                Showing {startBarangayIndex + 1} to {Math.min(endBarangayIndex, totalBarangayEntries)} of {totalBarangayEntries} entries
-              </div>
             </div>
 
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
@@ -206,26 +202,6 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
           <div className="space-y-4">
             {/* Entries per page selector */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Show</span>
-                <select
-                  value={entriesPerPage}
-                  onChange={(e) => {
-                    setEntriesPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                </select>
-                <span className="text-sm text-gray-600">entries</span>
-              </div>
-              
-              <div className="text-sm text-gray-600">
-                Showing {startStatusIndex + 1} to {Math.min(endStatusIndex, totalStatusEntries)} of {totalStatusEntries} entries
-              </div>
             </div>
 
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
@@ -357,26 +333,6 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
           <div className="space-y-4">
             {/* Entries per page selector */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Show</span>
-                <select
-                  value={entriesPerPage}
-                  onChange={(e) => {
-                    setEntriesPerPage(Number(e.target.value));
-                    setCurrentPage(1);
-                  }}
-                  className="px-3 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                </select>
-                <span className="text-sm text-gray-600">entries</span>
-              </div>
-              
-              <div className="text-sm text-gray-600">
-                Showing {startSummaryIndex + 1} to {Math.min(endSummaryIndex, totalSummaryEntries)} of {totalSummaryEntries} entries
-              </div>
             </div>
 
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
