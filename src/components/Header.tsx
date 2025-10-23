@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({ activeProgram, onProgramChange, user, o
             {/* User Info */}
             <div className="flex items-center space-x-3">
               <div className="text-right">
-                <p className="text-sm font-medium">{user?.name || 'Administrator'}</p>
+                <p className="text-sm font-medium">{user?.name || 'Admin'}</p>
                 <p className="text-xs opacity-75 capitalize">{user?.role || 'Admin'}</p>
               </div>
               <button 

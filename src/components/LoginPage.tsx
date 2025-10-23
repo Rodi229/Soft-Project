@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
-import SantaRosaLogo from "../assets/SantaRosa.png"; // adjust the path if needed
+import SantaRosaLogo from "../assets/SantaRosa.png";
 
 interface LoginPageProps {
   onLogin: (username: string, password: string) => Promise<boolean>;
