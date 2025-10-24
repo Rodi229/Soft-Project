@@ -380,29 +380,51 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
             </>
           )}
 
-          <div>
-            <label className="block text-sm font-bold mb-1 uppercase">Upload Resume</label>
-            {editingApplicant?.resumeFileName && (
-              <div className="mb-2">
-                <button
-                  type="button"
-                  onClick={() => editingApplicant.resumeFileData && downloadResume(editingApplicant.resumeFileName!, editingApplicant.resumeFileData)}
-                  className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium flex items-center space-x-1"
-                >
-                  <span>📄</span>
-                  <span>{editingApplicant.resumeFileName}</span>
-                </button>
-                <p className="text-xs text-gray-500 mt-1">Click to download existing resume. Upload a new file to replace it.</p>
-              </div>
-            )}
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={(e) => onInputChange('resumeFile', e.target.files?.[0] || null)}
-              className="w-full border rounded-lg px-3 py-2 bg-white cursor-pointer file:mr-3 file:py-1 file:px-3 file:border-0 file:rounded-md file:bg-yellow-400 file:text-black file:font-medium hover:file:bg-yellow-500 transition"
-            />
-            <p className="text-xs text-gray-500 mt-1">Accepted formats: PDF, DOC, DOCX</p>
-          </div>
+         <div>
+  <label className="block text-sm font-bold mb-1 uppercase">Upload Resume</label>
+
+    <div className="flex items-center gap-3 border rounded-lg px-3 py-2 bg-white">
+      <label className="cursor-pointer shrink-0">
+        <span className="bg-yellow-400 px-3 py-1 rounded-md font-medium hover:bg-yellow-500 transition whitespace-nowrap">
+          Choose File
+        </span>
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              onInputChange('resumeFile', file);
+              onInputChange('resumeFileName', file.name);
+            } else {
+              onInputChange('resumeFile', null);
+              onInputChange('resumeFileName', '');
+            }
+          }}
+        />
+      </label>
+
+      {(formData.resumeFileName || editingApplicant?.resumeFileName) ? (
+        <button
+          type="button"
+          onClick={() => {
+            const fileName = formData.resumeFileName || editingApplicant?.resumeFileName;
+            const fileData = formData.resumeFileData || editingApplicant?.resumeFileData;
+            if (fileName && fileData) {
+              downloadResume(fileName, fileData);
+            }
+          }}
+          className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium truncate max-w-[150px] text-left"
+          title={formData.resumeFileName || editingApplicant?.resumeFileName} // tooltip shows full name
+        >
+          {formData.resumeFileName || editingApplicant?.resumeFileName}
+        </button>
+      ) : (
+        <span className="text-gray-500 text-sm">No file chosen</span>
+      )}
+    </div>
+  </div>
 
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">Status</label>
