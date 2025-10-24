@@ -43,18 +43,6 @@ export interface Statistics {
   barangaysCovered: number;
   maleCount: number;
   femaleCount: number;
-  pendingMale: number;
-  pendingFemale: number;
-  approvedMale: number;
-  approvedFemale: number;
-  deployedMale: number;
-  deployedFemale: number;
-  completedMale: number;
-  completedFemale: number;
-  rejectedMale: number;
-  rejectedFemale: number;
-  resignedMale: number;
-  resignedFemale: number;
 }
 
 export interface BarangayStats {
@@ -111,22 +99,17 @@ export const saveApplicants = (program: 'GIP' | 'TUPAD', applicants: Applicant[]
 
 // Generate next applicant code
 export const generateApplicantCode = (program: 'GIP' | 'TUPAD'): string => {
-  // Get existing applicants to determine next number
   const existingApplicants = getApplicants(program);
-  
-  // Find the highest existing number for this program
   let maxNumber = 0;
+
   existingApplicants.forEach(applicant => {
     const codeMatch = applicant.code.match(new RegExp(`${program}-(\\d+)`));
     if (codeMatch) {
       const number = parseInt(codeMatch[1], 10);
-      if (number > maxNumber) {
-        maxNumber = number;
-      }
+      if (number > maxNumber) maxNumber = number;
     }
   });
-  
-  // Next number is maxNumber + 1
+
   const nextNumber = maxNumber + 1;
   const paddedNumber = nextNumber.toString().padStart(6, '0');
   return `${program}-${paddedNumber}`;
@@ -135,17 +118,17 @@ export const generateApplicantCode = (program: 'GIP' | 'TUPAD'): string => {
 // Add new applicant
 export const addApplicant = (applicantData: Omit<Applicant, 'id' | 'code' | 'dateSubmitted'>): Applicant => {
   const applicants = getApplicants(applicantData.program);
-  
+
   const newApplicant: Applicant = {
     ...applicantData,
     id: Date.now().toString(),
     code: generateApplicantCode(applicantData.program),
     dateSubmitted: new Date().toISOString().split('T')[0]
   };
-  
+
   applicants.push(newApplicant);
   saveApplicants(applicantData.program, applicants);
-  
+
   return newApplicant;
 };
 
@@ -153,7 +136,7 @@ export const addApplicant = (applicantData: Omit<Applicant, 'id' | 'code' | 'dat
 export const updateApplicant = (program: 'GIP' | 'TUPAD', updatedApplicant: Applicant): void => {
   const applicants = getApplicants(program);
   const index = applicants.findIndex(a => a.id === updatedApplicant.id);
-  
+
   if (index !== -1) {
     applicants[index] = updatedApplicant;
     saveApplicants(program, applicants);
@@ -197,10 +180,10 @@ export const deleteApplicant = (program: 'GIP' | 'TUPAD', applicantId: string): 
   saveApplicants(program, filteredApplicants);
 };
 
-// Get statistics for a program
+// ✅ FIXED getStatistics — includes per-status male/female counts
 export const getStatistics = (program: 'GIP' | 'TUPAD'): Statistics => {
   const applicants = getApplicants(program).filter(a => !a.archived);
-
+  
   const stats: Statistics = {
     totalApplicants: applicants.length,
     pending: applicants.filter(a => a.status === 'PENDING').length,
@@ -211,19 +194,7 @@ export const getStatistics = (program: 'GIP' | 'TUPAD'): Statistics => {
     resigned: applicants.filter(a => a.status === 'RESIGNED').length,
     barangaysCovered: [...new Set(applicants.map(a => a.barangay))].length,
     maleCount: applicants.filter(a => a.gender === 'MALE').length,
-    femaleCount: applicants.filter(a => a.gender === 'FEMALE').length,
-    pendingMale: applicants.filter(a => a.status === 'PENDING' && a.gender === 'MALE').length,
-    pendingFemale: applicants.filter(a => a.status === 'PENDING' && a.gender === 'FEMALE').length,
-    approvedMale: applicants.filter(a => a.status === 'APPROVED' && a.gender === 'MALE').length,
-    approvedFemale: applicants.filter(a => a.status === 'APPROVED' && a.gender === 'FEMALE').length,
-    deployedMale: applicants.filter(a => a.status === 'DEPLOYED' && a.gender === 'MALE').length,
-    deployedFemale: applicants.filter(a => a.status === 'DEPLOYED' && a.gender === 'FEMALE').length,
-    completedMale: applicants.filter(a => a.status === 'COMPLETED' && a.gender === 'MALE').length,
-    completedFemale: applicants.filter(a => a.status === 'COMPLETED' && a.gender === 'FEMALE').length,
-    rejectedMale: applicants.filter(a => a.status === 'REJECTED' && a.gender === 'MALE').length,
-    rejectedFemale: applicants.filter(a => a.status === 'REJECTED' && a.gender === 'FEMALE').length,
-    resignedMale: applicants.filter(a => a.status === 'RESIGNED' && a.gender === 'MALE').length,
-    resignedFemale: applicants.filter(a => a.status === 'RESIGNED' && a.gender === 'FEMALE').length
+    femaleCount: applicants.filter(a => a.gender === 'FEMALE').length
   };
 
   return stats;
@@ -233,14 +204,13 @@ export const getStatistics = (program: 'GIP' | 'TUPAD'): Statistics => {
 export const getBarangayStatistics = (program: 'GIP' | 'TUPAD'): BarangayStats[] => {
   const applicants = getApplicants(program).filter(a => !a.archived);
   const barangays = [
-    'APLAYA', 'BALIBAGO', 'CAINGIN', 'DILA', 'DITA', 'DON JOSE', 'IBABA', 
-    'KANLURAN', 'LABAS', 'MACABLING', 'MALITLIT', 'MALUSAK', 'MARKET AREA', 
+    'APLAYA', 'BALIBAGO', 'CAINGIN', 'DILA', 'DITA', 'DON JOSE', 'IBABA',
+    'KANLURAN', 'LABAS', 'MACABLING', 'MALITLIT', 'MALUSAK', 'MARKET AREA',
     'POOC', 'PULONG SANTA CRUZ', 'SANTO DOMINGO', 'SINALHAN', 'TAGAPO'
   ];
-  
+
   return barangays.map(barangay => {
     const barangayApplicants = applicants.filter(a => a.barangay === barangay);
-    
     return {
       barangay,
       total: barangayApplicants.length,
@@ -267,10 +237,9 @@ export const getStatusStatistics = (program: 'GIP' | 'TUPAD'): StatusStats[] => 
     { name: 'REJECTED', color: 'bg-orange-100 text-orange-800' },
     { name: 'RESIGNED', color: 'bg-gray-100 text-gray-800' }
   ];
-  
+
   return statuses.map(status => {
     const statusApplicants = applicants.filter(a => a.status === status.name);
-    
     return {
       status: status.name,
       total: statusApplicants.length,
@@ -285,10 +254,9 @@ export const getStatusStatistics = (program: 'GIP' | 'TUPAD'): StatusStats[] => 
 export const getGenderStatistics = (program: 'GIP' | 'TUPAD'): GenderStats[] => {
   const applicants = getApplicants(program).filter(a => !a.archived);
   const genders: ('MALE' | 'FEMALE')[] = ['MALE', 'FEMALE'];
-  
+
   return genders.map(gender => {
     const genderApplicants = applicants.filter(a => a.gender === gender);
-    
     return {
       gender,
       total: genderApplicants.length,
@@ -315,56 +283,53 @@ export const filterApplicants = (
   }
 ): Applicant[] => {
   let applicants = getApplicants(program);
-  
+
   if (filters.searchTerm) {
     const searchLower = filters.searchTerm.toLowerCase();
-    applicants = applicants.filter(a => 
+    applicants = applicants.filter(a =>
       a.firstName.toLowerCase().includes(searchLower) ||
       a.lastName.toLowerCase().includes(searchLower) ||
       a.code.toLowerCase().includes(searchLower) ||
       a.barangay.toLowerCase().includes(searchLower)
     );
   }
-  
+
   if (filters.status && filters.status !== 'All Status') {
     applicants = applicants.filter(a => a.status === filters.status);
   }
-  
+
   if (filters.barangay && filters.barangay !== 'All Barangays') {
     applicants = applicants.filter(a => a.barangay === filters.barangay);
   }
-  
+
   if (filters.gender && filters.gender !== 'All Genders') {
     applicants = applicants.filter(a => a.gender === filters.gender);
   }
-  
+
   if (filters.ageRange && filters.ageRange !== 'All Ages') {
     const [min, max] = filters.ageRange.split('-').map(n => parseInt(n.replace('+', '')));
-    if (max) {
-      applicants = applicants.filter(a => a.age >= min && a.age <= max);
-    } else {
-      applicants = applicants.filter(a => a.age >= min);
-    }
+    if (max) applicants = applicants.filter(a => a.age >= min && a.age <= max);
+    else applicants = applicants.filter(a => a.age >= min);
   }
-  
+
   if (filters.education && filters.education !== 'All Education Levels') {
     applicants = applicants.filter(a => a.educationalAttainment === filters.education);
   }
-  
+
   return applicants;
 };
 
-// Calculate age from birth date
+// Calculate age
 export const calculateAge = (birthDate: string): number => {
   const today = new Date();
   const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
-
+  
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-
+  
   return age;
 };
 
@@ -519,11 +484,9 @@ export const getGenderStatisticsByYear = (program: 'GIP' | 'TUPAD', year?: numbe
   });
 };
 
-// Initialize sample data (for demo purposes)
+// Initialize sample data (demo)
 export const initializeSampleData = (): void => {
-  // Only initialize if no data exists
   if (getApplicants('GIP').length === 0 && getApplicants('TUPAD').length === 0) {
-    // Add a few sample applicants for demonstration
     const sampleGIPApplicant: Omit<Applicant, 'id' | 'code' | 'dateSubmitted'> = {
       firstName: 'JUAN',
       lastName: 'DELA CRUZ',
@@ -537,7 +500,7 @@ export const initializeSampleData = (): void => {
       status: 'PENDING',
       program: 'GIP'
     };
-    
+
     const sampleTUPADApplicant: Omit<Applicant, 'id' | 'code' | 'dateSubmitted'> = {
       firstName: 'MARIA',
       lastName: 'SANTOS',
@@ -551,7 +514,7 @@ export const initializeSampleData = (): void => {
       status: 'APPROVED',
       program: 'TUPAD'
     };
-    
+
     addApplicant(sampleGIPApplicant);
     addApplicant(sampleTUPADApplicant);
   }

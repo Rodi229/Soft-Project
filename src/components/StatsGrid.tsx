@@ -8,7 +8,7 @@ interface StatsGridProps {
 
 const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
   const { statistics, isLoading } = useData(activeProgram);
-  
+
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-500' : 'bg-green-500';
   const primaryDarkColor = activeProgram === 'GIP' ? 'bg-red-600' : 'bg-green-600';
   const secondaryColor = activeProgram === 'GIP' ? 'bg-orange-500' : 'bg-blue-500';
@@ -98,6 +98,81 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       </div>
     );
   }
+
+  const stats = [
+    {
+      title: 'TOTAL APPLICANTS',
+      value: statistics?.totalApplicants?.toString() ?? '0',
+      male: statistics?.maleCount?.toString() ?? '0',
+      female: statistics?.femaleCount?.toString() ?? '0',
+      icon: Users,
+      bgColor: primaryColor,
+      iconBg: primaryDarkColor,
+    },
+    {
+      title: 'PENDING',
+      value: statistics?.pending?.toString() ?? '0',
+      male: statistics?.pendingMale?.toString() ?? '0',
+      female: statistics?.pendingFemale?.toString() ?? '0',
+      icon: Clock,
+      bgColor: secondaryColor,
+      iconBg: secondaryDarkColor,
+    },
+    {
+      title: 'APPROVED',
+      value: statistics?.approved?.toString() ?? '0',
+      male: statistics?.approvedMale?.toString() ?? '0',
+      female: statistics?.approvedFemale?.toString() ?? '0',
+      icon: UserCheck,
+      bgColor: 'bg-blue-500',
+      iconBg: 'bg-blue-600',
+    },
+    {
+      title: 'DEPLOYED',
+      value: statistics?.deployed?.toString() ?? '0',
+      male: statistics?.deployedMale?.toString() ?? '0',
+      female: statistics?.deployedFemale?.toString() ?? '0',
+      icon: CheckCircle,
+      bgColor: 'bg-green-500',
+      iconBg: 'bg-green-600',
+    },
+    {
+      title: 'COMPLETED',
+      value: statistics?.completed?.toString() ?? '0',
+      male: statistics?.completedMale?.toString() ?? '0',
+      female: statistics?.completedFemale?.toString() ?? '0',
+      icon: CheckCircle,
+      bgColor: 'bg-pink-400',
+      iconBg: 'bg-pink-500',
+    },
+    {
+      title: 'REJECTED',
+      value: statistics?.rejected?.toString() ?? '0',
+      male: statistics?.rejectedMale?.toString() ?? '0',
+      female: statistics?.rejectedFemale?.toString() ?? '0',
+      icon: X,
+      bgColor: 'bg-orange-500',
+      iconBg: 'bg-orange-600',
+    },
+    {
+      title: 'RESIGNED',
+      value: statistics?.resigned?.toString() ?? '0',
+      male: statistics?.resignedMale?.toString() ?? '0',
+      female: statistics?.resignedFemale?.toString() ?? '0',
+      icon: UserMinus,
+      bgColor: 'bg-gray-500',
+      iconBg: 'bg-gray-600',
+    },
+    {
+      title: 'BARANGAYS COVERED',
+      value: statistics?.barangaysCovered?.toString() ?? '0',
+      male: '0',
+      female: '0',
+      icon: MapPin,
+      bgColor: 'bg-gray-600',
+      iconBg: 'bg-gray-700',
+    },
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
