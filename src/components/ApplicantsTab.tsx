@@ -99,7 +99,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       civilStatus: applicant.civilStatus || '',
       averageMonthlyIncome: applicant.averageMonthlyIncome || '',
       dependentName: applicant.dependentName || '',
-      relationshipToDependent: applicant.relationshipToDependent || ''
+      relationshipToDependent: applicant.relationshipToDependent || '',
+      resumeFile: null
     });
     setShowModal(true);
   };
