@@ -13,9 +13,11 @@ import {
   filterApplicants,
   addApplicant,
   updateApplicant,
+  archiveApplicant,
+  unarchiveApplicant,
   deleteApplicant,
   initializeSampleData
-} from '../utils/dataService';
+} from '../utils/dataService.ts';
 
 export const useData = (program: 'GIP' | 'TUPAD') => {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -88,6 +90,28 @@ export const useData = (program: 'GIP' | 'TUPAD') => {
     }
   }, [program, refreshData]);
 
+  // Archive applicant
+  const handleArchiveApplicant = useCallback((applicantId: string) => {
+    try {
+      archiveApplicant(program, applicantId);
+      refreshData();
+    } catch (error) {
+      console.error('Error archiving applicant:', error);
+      throw error;
+    }
+  }, [program, refreshData]);
+
+  // Unarchive applicant
+  const handleUnarchiveApplicant = useCallback((applicantId: string) => {
+    try {
+      unarchiveApplicant(program, applicantId);
+      refreshData();
+    } catch (error) {
+      console.error('Error unarchiving applicant:', error);
+      throw error;
+    }
+  }, [program, refreshData]);
+
   // Delete applicant
   const handleDeleteApplicant = useCallback((applicantId: string) => {
     try {
@@ -121,6 +145,8 @@ export const useData = (program: 'GIP' | 'TUPAD') => {
     refreshData,
     addApplicant: handleAddApplicant,
     updateApplicant: handleUpdateApplicant,
+    archiveApplicant: handleArchiveApplicant,
+    unarchiveApplicant: handleUnarchiveApplicant,
     deleteApplicant: handleDeleteApplicant,
     getFilteredApplicants
   };

@@ -2,7 +2,7 @@ import React from 'react';
 import StatsCards from './StatsCards';
 import RecentActivity from './RecentActivity';
 import QuickActions from './QuickActions';
-import AnalyticsChart from './AnalyticsChart';
+import ApplicationActions from './ApplicantActions';
 
 const DashboardContent: React.FC = () => {
   return (
@@ -20,7 +20,7 @@ const DashboardContent: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Analytics Chart - Takes up 2 columns */}
         <div className="lg:col-span-2">
-          <AnalyticsChart />
+          <ApplicationActions />
         </div>
         
         {/* Quick Actions */}

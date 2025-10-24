@@ -26,6 +26,8 @@ export interface Applicant {
   averageMonthlyIncome?: string;
   dependentName?: string;
   relationshipToDependent?: string;
+  archived?: boolean;
+  archivedDate?: string;
 }
 
 export interface Statistics {
@@ -144,7 +146,37 @@ export const updateApplicant = (program: 'GIP' | 'TUPAD', updatedApplicant: Appl
   }
 };
 
-// Delete applicant
+// Archive applicant
+export const archiveApplicant = (program: 'GIP' | 'TUPAD', applicantId: string): void => {
+  const applicants = getApplicants(program);
+  const index = applicants.findIndex(a => a.id === applicantId);
+
+  if (index !== -1) {
+    applicants[index] = {
+      ...applicants[index],
+      archived: true,
+      archivedDate: new Date().toISOString().split('T')[0]
+    };
+    saveApplicants(program, applicants);
+  }
+};
+
+// Unarchive applicant
+export const unarchiveApplicant = (program: 'GIP' | 'TUPAD', applicantId: string): void => {
+  const applicants = getApplicants(program);
+  const index = applicants.findIndex(a => a.id === applicantId);
+
+  if (index !== -1) {
+    applicants[index] = {
+      ...applicants[index],
+      archived: false,
+      archivedDate: undefined
+    };
+    saveApplicants(program, applicants);
+  }
+};
+
+// Delete applicant permanently
 export const deleteApplicant = (program: 'GIP' | 'TUPAD', applicantId: string): void => {
   const applicants = getApplicants(program);
   const filteredApplicants = applicants.filter(a => a.id !== applicantId);
@@ -153,7 +185,7 @@ export const deleteApplicant = (program: 'GIP' | 'TUPAD', applicantId: string): 
 
 // Get statistics for a program
 export const getStatistics = (program: 'GIP' | 'TUPAD'): Statistics => {
-  const applicants = getApplicants(program);
+  const applicants = getApplicants(program).filter(a => !a.archived);
   
   const stats: Statistics = {
     totalApplicants: applicants.length,
@@ -173,7 +205,7 @@ export const getStatistics = (program: 'GIP' | 'TUPAD'): Statistics => {
 
 // Get barangay statistics
 export const getBarangayStatistics = (program: 'GIP' | 'TUPAD'): BarangayStats[] => {
-  const applicants = getApplicants(program);
+  const applicants = getApplicants(program).filter(a => !a.archived);
   const barangays = [
     'APLAYA', 'BALIBAGO', 'CAINGIN', 'DILA', 'DITA', 'DON JOSE', 'IBABA', 
     'KANLURAN', 'LABAS', 'MACABLING', 'MALITLIT', 'MALUSAK', 'MARKET AREA', 
@@ -200,7 +232,7 @@ export const getBarangayStatistics = (program: 'GIP' | 'TUPAD'): BarangayStats[]
 
 // Get status statistics
 export const getStatusStatistics = (program: 'GIP' | 'TUPAD'): StatusStats[] => {
-  const applicants = getApplicants(program);
+  const applicants = getApplicants(program).filter(a => !a.archived);
   const statuses = [
     { name: 'PENDING', color: 'bg-yellow-100 text-yellow-800' },
     { name: 'APPROVED', color: 'bg-blue-100 text-blue-800' },
@@ -225,7 +257,7 @@ export const getStatusStatistics = (program: 'GIP' | 'TUPAD'): StatusStats[] => 
 
 // Get gender statistics
 export const getGenderStatistics = (program: 'GIP' | 'TUPAD'): GenderStats[] => {
-  const applicants = getApplicants(program);
+  const applicants = getApplicants(program).filter(a => !a.archived);
   const genders: ('MALE' | 'FEMALE')[] = ['MALE', 'FEMALE'];
   
   return genders.map(gender => {

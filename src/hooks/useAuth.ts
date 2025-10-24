@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AuthState, User, login as authLogin, logout as authLogout, getAuthState, refreshSession } from '../utils/auth';
+import { AuthState, login as authLogin, logout as authLogout, getAuthState, refreshSession } from '../utils/auth';
 
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>(() => getAuthState());
