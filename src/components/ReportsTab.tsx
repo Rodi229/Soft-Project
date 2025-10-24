@@ -1,17 +1,43 @@
-import React, { useState } from 'react';
-import { BarChart3, PieChart, Printer, Download, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BarChart3, PieChart, Printer, Download, FileText, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { exportStatsToCSV, exportStatsToPDF, printStats, StatsData } from '../utils/exportUtils';
-import { useData } from '../hooks/useData';
+import { getAvailableYears, getStatisticsByYear, getBarangayStatisticsByYear, getStatusStatisticsByYear, getGenderStatisticsByYear } from '../utils/dataService';
 
 interface ReportsTabProps {
   activeProgram: 'GIP' | 'TUPAD';
 }
 
 const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
-  const { statistics, barangayStats, statusStats, genderStats, isLoading } = useData(activeProgram);
   const [selectedReportType, setSelectedReportType] = useState('summary');
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [statistics, setStatistics] = useState<any>(null);
+  const [barangayStats, setBarangayStats] = useState<any[]>([]);
+  const [statusStats, setStatusStats] = useState<any[]>([]);
+  const [genderStats, setGenderStats] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const years = getAvailableYears(activeProgram);
+    setAvailableYears(years);
+    loadData();
+  }, [activeProgram, selectedYear]);
+
+  const loadData = () => {
+    setIsLoading(true);
+    const stats = getStatisticsByYear(activeProgram, selectedYear);
+    const barangay = getBarangayStatisticsByYear(activeProgram, selectedYear);
+    const status = getStatusStatisticsByYear(activeProgram, selectedYear);
+    const gender = getGenderStatisticsByYear(activeProgram, selectedYear);
+
+    setStatistics(stats);
+    setBarangayStats(barangay);
+    setStatusStats(status);
+    setGenderStats(gender);
+    setIsLoading(false);
+  };
   
   const primaryColor = activeProgram === 'GIP' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700';
   const programName = activeProgram === 'GIP' ? 'GIP' : 'TUPAD';
@@ -49,12 +75,12 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
     { id: 'gender', label: 'By Gender', icon: PieChart, color: 'border-pink-500 bg-pink-50 text-pink-600' },
   ];
 
-  const summaryData = [
+  const summaryData = statistics ? [
     { label: 'Total Applicants', value: statistics.totalApplicants.toString(), male: statistics.maleCount.toString(), female: statistics.femaleCount.toString(), color: 'text-blue-600' },
-    { label: 'Approved', value: statistics.approved.toString(), male: '0', female: '0', color: 'text-green-600' },
-    { label: 'Deployed', value: statistics.deployed.toString(), male: '0', female: '0', color: 'text-orange-600' },
-    { label: 'Completed', value: statistics.completed.toString(), male: '0', female: '0', color: 'text-purple-600' },
-  ];
+    { label: 'Approved', value: statistics.approved.toString(), male: statistics.approvedMale.toString(), female: statistics.approvedFemale.toString(), color: 'text-green-600' },
+    { label: 'Deployed', value: statistics.deployed.toString(), male: statistics.deployedMale.toString(), female: statistics.deployedFemale.toString(), color: 'text-orange-600' },
+    { label: 'Completed', value: statistics.completed.toString(), male: statistics.completedMale.toString(), female: statistics.completedFemale.toString(), color: 'text-purple-600' },
+  ] : [];
 
   // Reset pagination when report type changes
   React.useEffect(() => {
@@ -411,7 +437,21 @@ const ReportsTab: React.FC<ReportsTabProps> = ({ activeProgram }) => {
           <h1 className="text-2xl font-bold text-gray-900">{programName} REPORTS</h1>
           <p className="text-gray-600">Generate and view comprehensive reports</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 items-center">
+          {/* Year Filter */}
+          <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
+            <Calendar className="w-4 h-4 text-gray-500" />
+            <select
+              value={selectedYear || ''}
+              onChange={(e) => setSelectedYear(e.target.value ? Number(e.target.value) : undefined)}
+              className="text-sm border-0 focus:ring-0 bg-transparent cursor-pointer"
+            >
+              <option value="">All Years</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
           <button 
             onClick={handlePrint}
             className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"

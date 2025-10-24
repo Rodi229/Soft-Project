@@ -43,6 +43,18 @@ export interface Statistics {
   barangaysCovered: number;
   maleCount: number;
   femaleCount: number;
+  pendingMale: number;
+  pendingFemale: number;
+  approvedMale: number;
+  approvedFemale: number;
+  deployedMale: number;
+  deployedFemale: number;
+  completedMale: number;
+  completedFemale: number;
+  rejectedMale: number;
+  rejectedFemale: number;
+  resignedMale: number;
+  resignedFemale: number;
 }
 
 export interface BarangayStats {
@@ -188,7 +200,7 @@ export const deleteApplicant = (program: 'GIP' | 'TUPAD', applicantId: string): 
 // Get statistics for a program
 export const getStatistics = (program: 'GIP' | 'TUPAD'): Statistics => {
   const applicants = getApplicants(program).filter(a => !a.archived);
-  
+
   const stats: Statistics = {
     totalApplicants: applicants.length,
     pending: applicants.filter(a => a.status === 'PENDING').length,
@@ -199,9 +211,21 @@ export const getStatistics = (program: 'GIP' | 'TUPAD'): Statistics => {
     resigned: applicants.filter(a => a.status === 'RESIGNED').length,
     barangaysCovered: [...new Set(applicants.map(a => a.barangay))].length,
     maleCount: applicants.filter(a => a.gender === 'MALE').length,
-    femaleCount: applicants.filter(a => a.gender === 'FEMALE').length
+    femaleCount: applicants.filter(a => a.gender === 'FEMALE').length,
+    pendingMale: applicants.filter(a => a.status === 'PENDING' && a.gender === 'MALE').length,
+    pendingFemale: applicants.filter(a => a.status === 'PENDING' && a.gender === 'FEMALE').length,
+    approvedMale: applicants.filter(a => a.status === 'APPROVED' && a.gender === 'MALE').length,
+    approvedFemale: applicants.filter(a => a.status === 'APPROVED' && a.gender === 'FEMALE').length,
+    deployedMale: applicants.filter(a => a.status === 'DEPLOYED' && a.gender === 'MALE').length,
+    deployedFemale: applicants.filter(a => a.status === 'DEPLOYED' && a.gender === 'FEMALE').length,
+    completedMale: applicants.filter(a => a.status === 'COMPLETED' && a.gender === 'MALE').length,
+    completedFemale: applicants.filter(a => a.status === 'COMPLETED' && a.gender === 'FEMALE').length,
+    rejectedMale: applicants.filter(a => a.status === 'REJECTED' && a.gender === 'MALE').length,
+    rejectedFemale: applicants.filter(a => a.status === 'REJECTED' && a.gender === 'FEMALE').length,
+    resignedMale: applicants.filter(a => a.status === 'RESIGNED' && a.gender === 'MALE').length,
+    resignedFemale: applicants.filter(a => a.status === 'RESIGNED' && a.gender === 'FEMALE').length
   };
-  
+
   return stats;
 };
 
@@ -336,12 +360,163 @@ export const calculateAge = (birthDate: string): number => {
   const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-  
+
   return age;
+};
+
+// Get available years from applicants
+export const getAvailableYears = (program: 'GIP' | 'TUPAD'): number[] => {
+  const applicants = getApplicants(program);
+  const years = new Set<number>();
+
+  applicants.forEach(applicant => {
+    if (applicant.dateSubmitted) {
+      const year = new Date(applicant.dateSubmitted).getFullYear();
+      years.add(year);
+    }
+  });
+
+  return Array.from(years).sort((a, b) => b - a);
+};
+
+// Get statistics filtered by year
+export const getStatisticsByYear = (program: 'GIP' | 'TUPAD', year?: number): Statistics => {
+  let applicants = getApplicants(program).filter(a => !a.archived);
+
+  if (year) {
+    applicants = applicants.filter(a => {
+      if (!a.dateSubmitted) return false;
+      return new Date(a.dateSubmitted).getFullYear() === year;
+    });
+  }
+
+  const stats: Statistics = {
+    totalApplicants: applicants.length,
+    pending: applicants.filter(a => a.status === 'PENDING').length,
+    approved: applicants.filter(a => a.status === 'APPROVED').length,
+    deployed: applicants.filter(a => a.status === 'DEPLOYED').length,
+    completed: applicants.filter(a => a.status === 'COMPLETED').length,
+    rejected: applicants.filter(a => a.status === 'REJECTED').length,
+    resigned: applicants.filter(a => a.status === 'RESIGNED').length,
+    barangaysCovered: [...new Set(applicants.map(a => a.barangay))].length,
+    maleCount: applicants.filter(a => a.gender === 'MALE').length,
+    femaleCount: applicants.filter(a => a.gender === 'FEMALE').length,
+    pendingMale: applicants.filter(a => a.status === 'PENDING' && a.gender === 'MALE').length,
+    pendingFemale: applicants.filter(a => a.status === 'PENDING' && a.gender === 'FEMALE').length,
+    approvedMale: applicants.filter(a => a.status === 'APPROVED' && a.gender === 'MALE').length,
+    approvedFemale: applicants.filter(a => a.status === 'APPROVED' && a.gender === 'FEMALE').length,
+    deployedMale: applicants.filter(a => a.status === 'DEPLOYED' && a.gender === 'MALE').length,
+    deployedFemale: applicants.filter(a => a.status === 'DEPLOYED' && a.gender === 'FEMALE').length,
+    completedMale: applicants.filter(a => a.status === 'COMPLETED' && a.gender === 'MALE').length,
+    completedFemale: applicants.filter(a => a.status === 'COMPLETED' && a.gender === 'FEMALE').length,
+    rejectedMale: applicants.filter(a => a.status === 'REJECTED' && a.gender === 'MALE').length,
+    rejectedFemale: applicants.filter(a => a.status === 'REJECTED' && a.gender === 'FEMALE').length,
+    resignedMale: applicants.filter(a => a.status === 'RESIGNED' && a.gender === 'MALE').length,
+    resignedFemale: applicants.filter(a => a.status === 'RESIGNED' && a.gender === 'FEMALE').length
+  };
+
+  return stats;
+};
+
+// Get barangay statistics filtered by year
+export const getBarangayStatisticsByYear = (program: 'GIP' | 'TUPAD', year?: number): BarangayStats[] => {
+  let applicants = getApplicants(program).filter(a => !a.archived);
+
+  if (year) {
+    applicants = applicants.filter(a => {
+      if (!a.dateSubmitted) return false;
+      return new Date(a.dateSubmitted).getFullYear() === year;
+    });
+  }
+
+  const barangays = [
+    'APLAYA', 'BALIBAGO', 'CAINGIN', 'DILA', 'DITA', 'DON JOSE', 'IBABA',
+    'KANLURAN', 'LABAS', 'MACABLING', 'MALITLIT', 'MALUSAK', 'MARKET AREA',
+    'POOC', 'PULONG SANTA CRUZ', 'SANTO DOMINGO', 'SINALHAN', 'TAGAPO'
+  ];
+
+  return barangays.map(barangay => {
+    const barangayApplicants = applicants.filter(a => a.barangay === barangay);
+
+    return {
+      barangay,
+      total: barangayApplicants.length,
+      male: barangayApplicants.filter(a => a.gender === 'MALE').length,
+      female: barangayApplicants.filter(a => a.gender === 'FEMALE').length,
+      pending: barangayApplicants.filter(a => a.status === 'PENDING').length,
+      approved: barangayApplicants.filter(a => a.status === 'APPROVED').length,
+      deployed: barangayApplicants.filter(a => a.status === 'DEPLOYED').length,
+      completed: barangayApplicants.filter(a => a.status === 'COMPLETED').length,
+      rejected: barangayApplicants.filter(a => a.status === 'REJECTED').length,
+      resigned: barangayApplicants.filter(a => a.status === 'RESIGNED').length
+    };
+  });
+};
+
+// Get status statistics filtered by year
+export const getStatusStatisticsByYear = (program: 'GIP' | 'TUPAD', year?: number): StatusStats[] => {
+  let applicants = getApplicants(program).filter(a => !a.archived);
+
+  if (year) {
+    applicants = applicants.filter(a => {
+      if (!a.dateSubmitted) return false;
+      return new Date(a.dateSubmitted).getFullYear() === year;
+    });
+  }
+
+  const statuses = [
+    { name: 'PENDING', color: 'bg-yellow-100 text-yellow-800' },
+    { name: 'APPROVED', color: 'bg-blue-100 text-blue-800' },
+    { name: 'DEPLOYED', color: 'bg-green-100 text-green-800' },
+    { name: 'COMPLETED', color: 'bg-pink-100 text-pink-800' },
+    { name: 'REJECTED', color: 'bg-orange-100 text-orange-800' },
+    { name: 'RESIGNED', color: 'bg-gray-100 text-gray-800' }
+  ];
+
+  return statuses.map(status => {
+    const statusApplicants = applicants.filter(a => a.status === status.name);
+
+    return {
+      status: status.name,
+      total: statusApplicants.length,
+      male: statusApplicants.filter(a => a.gender === 'MALE').length,
+      female: statusApplicants.filter(a => a.gender === 'FEMALE').length,
+      color: status.color
+    };
+  });
+};
+
+// Get gender statistics filtered by year
+export const getGenderStatisticsByYear = (program: 'GIP' | 'TUPAD', year?: number): GenderStats[] => {
+  let applicants = getApplicants(program).filter(a => !a.archived);
+
+  if (year) {
+    applicants = applicants.filter(a => {
+      if (!a.dateSubmitted) return false;
+      return new Date(a.dateSubmitted).getFullYear() === year;
+    });
+  }
+
+  const genders: ('MALE' | 'FEMALE')[] = ['MALE', 'FEMALE'];
+
+  return genders.map(gender => {
+    const genderApplicants = applicants.filter(a => a.gender === gender);
+
+    return {
+      gender,
+      total: genderApplicants.length,
+      pending: genderApplicants.filter(a => a.status === 'PENDING').length,
+      approved: genderApplicants.filter(a => a.status === 'APPROVED').length,
+      deployed: genderApplicants.filter(a => a.status === 'DEPLOYED').length,
+      completed: genderApplicants.filter(a => a.status === 'COMPLETED').length,
+      rejected: genderApplicants.filter(a => a.status === 'REJECTED').length,
+      resigned: genderApplicants.filter(a => a.status === 'RESIGNED').length
+    };
+  });
 };
 
 // Initialize sample data (for demo purposes)
