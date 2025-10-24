@@ -401,7 +401,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             ) : (
               <>
                 <Archive className="w-4 h-4" />
-                <span>View Archive</span>
+                <span>Archive</span>
               </>
             )}
           </button>

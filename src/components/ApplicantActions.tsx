@@ -9,13 +9,13 @@ export const handleArchive = async (
   refreshData: any
 ) => {
   const result = await Swal.fire({
-    title: 'Archive Applicant?',
-    text: `Are you sure you want to archive ${applicantName}? The data will be automatically deleted after 30 days.`,
+    title: 'Delete Applicant?',
+    text: `Are you sure you want to delete ${applicantName}?`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#f59e0b',
+    confirmButtonColor: '#d33',
     cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, archive it',
+    confirmButtonText: 'Confirm',
     cancelButtonText: 'Cancel',
     reverseButtons: true,
     customClass: {
@@ -38,8 +38,8 @@ export const handleArchive = async (
         await refreshData();
         await Swal.fire({
           icon: 'success',
-          title: 'Archived!',
-          text: 'The applicant has been successfully archived. It will be permanently deleted after 30 days.',
+          title: 'Deleted!',
+          text: 'The applicant has been successfully deleted. It will be permanently deleted after 30 days.',
           confirmButtonColor: '#3085d6',
           customClass: {
             popup: 'rounded-2xl shadow-lg',
@@ -77,7 +77,7 @@ export const handleUnarchive = async (
     showCancelButton: true,
     confirmButtonColor: '#10b981',
     cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, restore it',
+    confirmButtonText: 'Confirm',
     cancelButtonText: 'Cancel',
     reverseButtons: true,
     customClass: {
@@ -137,7 +137,7 @@ export const handleDelete = async (
     showCancelButton: true,
     confirmButtonColor: '#d33',
     cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete permanently',
+    confirmButtonText: 'Confirm',
     cancelButtonText: 'Cancel',
     reverseButtons: true,
     customClass: {
