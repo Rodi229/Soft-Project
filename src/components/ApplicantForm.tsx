@@ -198,10 +198,18 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
             <input
               type="text"
               value={formData.contactNumber}
-              onChange={(e) => onInputChange('contactNumber', e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                onInputChange('contactNumber', value);
+              }}
+              pattern="[0-9]{10,11}"
+              title="Contact number must be 10-11 digits"
               required
+              maxLength={11}
+              placeholder="09XXXXXXXXX"
               className="w-full border rounded-lg px-3 py-2"
             />
+            <p className="text-xs text-gray-500 mt-1">Enter 10-11 digit phone number</p>
           </div>
 
           <div>
