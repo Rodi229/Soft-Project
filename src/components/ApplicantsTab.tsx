@@ -47,7 +47,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     civilStatus: '',
     averageMonthlyIncome: '',
     dependentName: '',
-    relationshipToDependent: ''
+    relationshipToDependent: '',
+    resumeFile: null as File | null
   });
 
   const generateApplicantCode = () => {
@@ -126,7 +127,17 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       civilStatus: '',
       averageMonthlyIncome: '',
       dependentName: '',
-      relationshipToDependent: ''
+      relationshipToDependent: '',
+      resumeFile: null
+    });
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
     });
   };
 
@@ -211,6 +222,14 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       }
 
       if (editingApplicant) {
+        let resumeFileName = editingApplicant.resumeFileName;
+        let resumeFileData = editingApplicant.resumeFileData;
+
+        if (formData.resumeFile) {
+          resumeFileName = formData.resumeFile.name;
+          resumeFileData = await fileToBase64(formData.resumeFile);
+        }
+
         const updatedApplicant: Applicant = {
           ...editingApplicant,
           firstName: formData.firstName,
@@ -227,6 +246,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           code: applicantCode,
           status: formData.status,
           program: activeProgram,
+          resumeFileName,
+          resumeFileData,
           idType: activeProgram === 'TUPAD' ? formData.idType : undefined,
           idNumber: activeProgram === 'TUPAD' ? formData.idNumber : undefined,
           occupation: activeProgram === 'TUPAD' ? formData.occupation : undefined,
@@ -249,6 +270,14 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           },
         });
       } else {
+        let resumeFileName: string | undefined;
+        let resumeFileData: string | undefined;
+
+        if (formData.resumeFile) {
+          resumeFileName = formData.resumeFile.name;
+          resumeFileData = await fileToBase64(formData.resumeFile);
+        }
+
         const applicantData: Omit<Applicant, 'id' | 'dateSubmitted'> = {
           firstName: formData.firstName,
           middleName: formData.middleName || undefined,
@@ -265,6 +294,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           encoder: 'Administrator',
           status: formData.status,
           program: activeProgram,
+          resumeFileName,
+          resumeFileData,
           idType: activeProgram === 'TUPAD' ? formData.idType : undefined,
           idNumber: activeProgram === 'TUPAD' ? formData.idNumber : undefined,
           occupation: activeProgram === 'TUPAD' ? formData.occupation : undefined,
@@ -305,7 +336,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: any) => {
     const fieldsToCapitalize = [
       'firstName', 'middleName', 'lastName', 'extensionName',
       'barangay', 'idNumber', 'occupation', 'dependentName',

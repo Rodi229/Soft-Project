@@ -14,6 +14,8 @@ export interface Applicant {
   educationalAttainment: string;
   beneficiaryName?: string;
   resumeFile?: File;
+  resumeFileName?: string;
+  resumeFileData?: string;
   encoder: string;
   status: 'PENDING' | 'APPROVED' | 'DEPLOYED' | 'COMPLETED' | 'REJECTED' | 'RESIGNED';
   dateSubmitted: string;

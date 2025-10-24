@@ -15,6 +15,15 @@ interface ApplicantFormProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
+const downloadResume = (fileName: string, fileData: string) => {
+  const link = document.createElement('a');
+  link.href = fileData;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const ApplicantForm: React.FC<ApplicantFormProps> = ({
   showModal,
   editingApplicant,
@@ -373,6 +382,19 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
 
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">Upload Resume</label>
+            {editingApplicant?.resumeFileName && (
+              <div className="mb-2">
+                <button
+                  type="button"
+                  onClick={() => editingApplicant.resumeFileData && downloadResume(editingApplicant.resumeFileName!, editingApplicant.resumeFileData)}
+                  className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium flex items-center space-x-1"
+                >
+                  <span>📄</span>
+                  <span>{editingApplicant.resumeFileName}</span>
+                </button>
+                <p className="text-xs text-gray-500 mt-1">Click to download existing resume. Upload a new file to replace it.</p>
+              </div>
+            )}
             <input
               type="file"
               accept=".pdf,.doc,.docx"
