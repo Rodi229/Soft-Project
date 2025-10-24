@@ -1,5 +1,13 @@
 import React from 'react';
-import { Users, Clock, UserCheck, CheckCircle, X, UserMinus, MapPin } from 'lucide-react';
+import {
+  Users,
+  Clock,
+  UserCheck,
+  CheckCircle,
+  X,
+  UserMinus,
+  MapPin
+} from 'lucide-react';
 import { useData } from '../hooks/useData';
 
 interface StatsGridProps {
@@ -14,91 +22,21 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
   const secondaryColor = activeProgram === 'GIP' ? 'bg-orange-500' : 'bg-blue-500';
   const secondaryDarkColor = activeProgram === 'GIP' ? 'bg-orange-600' : 'bg-blue-600';
 
-  const stats = [
-    {
-      title: 'TOTAL APPLICANTS',
-      value: statistics.totalApplicants.toString(),
-      male: statistics.maleCount.toString(),
-      female: statistics.femaleCount.toString(),
-      icon: Users,
-      bgColor: primaryColor,
-      iconBg: primaryDarkColor,
-    },
-    {
-      title: 'PENDING',
-      value: statistics.pending.toString(),
-      male: statistics.pendingMale.toString(),
-      female: statistics.pendingFemale.toString(),
-      icon: Clock,
-      bgColor: secondaryColor,
-      iconBg: secondaryDarkColor,
-    },
-    {
-      title: 'APPROVED',
-      value: statistics.approved.toString(),
-      male: statistics.approvedMale.toString(),
-      female: statistics.approvedFemale.toString(),
-      icon: UserCheck,
-      bgColor: 'bg-blue-500',
-      iconBg: 'bg-blue-600',
-    },
-    {
-      title: 'DEPLOYED',
-      value: statistics.deployed.toString(),
-      male: statistics.deployedMale.toString(),
-      female: statistics.deployedFemale.toString(),
-      icon: CheckCircle,
-      bgColor: 'bg-green-500',
-      iconBg: 'bg-green-600',
-    },
-    {
-      title: 'COMPLETED',
-      value: statistics.completed.toString(),
-      male: statistics.completedMale.toString(),
-      female: statistics.completedFemale.toString(),
-      icon: CheckCircle,
-      bgColor: 'bg-pink-400',
-      iconBg: 'bg-pink-500',
-    },
-    {
-      title: 'REJECTED',
-      value: statistics.rejected.toString(),
-      male: statistics.rejectedMale.toString(),
-      female: statistics.rejectedFemale.toString(),
-      icon: X,
-      bgColor: 'bg-orange-500',
-      iconBg: 'bg-orange-600',
-    },
-    {
-      title: 'RESIGNED',
-      value: statistics.resigned.toString(),
-      male: statistics.resignedMale.toString(),
-      female: statistics.resignedFemale.toString(),
-      icon: UserMinus,
-      bgColor: 'bg-gray-500',
-      iconBg: 'bg-gray-600',
-    },
-    {
-      title: 'BARANGAYS COVERED',
-      value: statistics.barangaysCovered.toString(),
-      male: '0',
-      female: '0',
-      icon: MapPin,
-      bgColor: 'bg-gray-600',
-      iconBg: 'bg-gray-700',
-    },
-  ];
-
+  // 🔹 Show loading skeletons
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="bg-gray-200 animate-pulse rounded-lg p-6 h-32"></div>
+          <div
+            key={index}
+            className="bg-gray-200 animate-pulse rounded-lg p-6 h-32"
+          ></div>
         ))}
       </div>
     );
   }
 
+  // ✅ Only one declaration of stats
   const stats = [
     {
       title: 'TOTAL APPLICANTS',
@@ -107,7 +45,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: statistics?.femaleCount?.toString() ?? '0',
       icon: Users,
       bgColor: primaryColor,
-      iconBg: primaryDarkColor,
+      iconBg: primaryDarkColor
     },
     {
       title: 'PENDING',
@@ -116,7 +54,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: statistics?.pendingFemale?.toString() ?? '0',
       icon: Clock,
       bgColor: secondaryColor,
-      iconBg: secondaryDarkColor,
+      iconBg: secondaryDarkColor
     },
     {
       title: 'APPROVED',
@@ -125,7 +63,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: statistics?.approvedFemale?.toString() ?? '0',
       icon: UserCheck,
       bgColor: 'bg-blue-500',
-      iconBg: 'bg-blue-600',
+      iconBg: 'bg-blue-600'
     },
     {
       title: 'DEPLOYED',
@@ -134,7 +72,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: statistics?.deployedFemale?.toString() ?? '0',
       icon: CheckCircle,
       bgColor: 'bg-green-500',
-      iconBg: 'bg-green-600',
+      iconBg: 'bg-green-600'
     },
     {
       title: 'COMPLETED',
@@ -143,7 +81,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: statistics?.completedFemale?.toString() ?? '0',
       icon: CheckCircle,
       bgColor: 'bg-pink-400',
-      iconBg: 'bg-pink-500',
+      iconBg: 'bg-pink-500'
     },
     {
       title: 'REJECTED',
@@ -152,7 +90,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: statistics?.rejectedFemale?.toString() ?? '0',
       icon: X,
       bgColor: 'bg-orange-500',
-      iconBg: 'bg-orange-600',
+      iconBg: 'bg-orange-600'
     },
     {
       title: 'RESIGNED',
@@ -161,7 +99,7 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: statistics?.resignedFemale?.toString() ?? '0',
       icon: UserMinus,
       bgColor: 'bg-gray-500',
-      iconBg: 'bg-gray-600',
+      iconBg: 'bg-gray-600'
     },
     {
       title: 'BARANGAYS COVERED',
@@ -170,8 +108,8 @@ const StatsGrid: React.FC<StatsGridProps> = ({ activeProgram }) => {
       female: '0',
       icon: MapPin,
       bgColor: 'bg-gray-600',
-      iconBg: 'bg-gray-700',
-    },
+      iconBg: 'bg-gray-700'
+    }
   ];
 
   return (
