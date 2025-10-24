@@ -237,6 +237,33 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
             <p className="text-xs text-gray-500 mt-1">Format: 09XX-XXX-XXXX</p>
           </div>
 
+          {/* Email Field */}
+          <div>
+            <label className="block text-sm font-bold mb-1 uppercase">Email *</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => onInputChange('email', e.target.value)}
+              required
+              placeholder="example@email.com"
+              className="w-full border rounded-lg px-3 py-2"
+            />
+          </div>
+
+          {/* School Field */}
+          <div>
+            <label className="block text-sm font-bold mb-1 uppercase">School</label>
+            <input
+              type="text"
+              value={formData.school}
+              onChange={(e) => onInputChange('school', e.target.value)}
+              placeholder="Enter school name"
+              className="w-full border rounded-lg px-3 py-2 uppercase"
+              style={{ textTransform: 'uppercase' }}
+            />
+          </div>
+
+
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">Gender *</label>
             <select
