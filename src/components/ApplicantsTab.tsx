@@ -6,6 +6,7 @@ import { Applicant, calculateAge } from "../utils/dataService.ts";
 import { handleArchive, handleUnarchive, handleDelete } from '../components/ApplicantActions.tsx';
 import ApplicantForm from '../components/ApplicantForm.tsx';
 import ApplicantProfile from '../components/ApplicantProfile.tsx';
+import { getCurrentUser } from '../utils/auth';
 import Swal from "sweetalert2";
 
 interface ApplicantsTabProps {
@@ -14,6 +15,8 @@ interface ApplicantsTabProps {
 
 const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   const {addApplicant, updateApplicant, deleteApplicant, getFilteredApplicants, refreshData } = useData(activeProgram);
+  const currentUser = getCurrentUser();
+  const isAdmin = currentUser?.role === 'admin';
 
   const [showModal, setShowModal] = useState(false);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
@@ -433,23 +436,25 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           <h1 className="text-2xl font-bold text-gray-900">{programName} APPLICANTS{showArchived ? ' - ARCHIVE' : ''}</h1>
         </div>
         <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-          >
-            {showArchived ? (
-              <>
-                <ArchiveRestore className="w-4 h-4" />
-                <span>View Active</span>
-              </>
-            ) : (
-              <>
-                <Archive className="w-4 h-4" />
-                <span>Archive</span>
-              </>
-            )}
-          </button>
-          {!showArchived && (
+          {isAdmin && (
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+            >
+              {showArchived ? (
+                <>
+                  <ArchiveRestore className="w-4 h-4" />
+                  <span>View Active</span>
+                </>
+              ) : (
+                <>
+                  <Archive className="w-4 h-4" />
+                  <span>Archive</span>
+                </>
+              )}
+            </button>
+          )}
+          {!showArchived && isAdmin && (
             <button
               onClick={openModal}
               className={`${primaryColor} text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200`}
@@ -648,37 +653,45 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                 <div className="flex items-center space-x-2">
                   {showArchived ? (
                     <>
-                      <button
-                        onClick={() => handleUnarchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData)}
-                        className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors duration-200"
-                        title="Restore applicant"
-                      >
-                        <ArchiveRestore className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`, deleteApplicant)}
-                        className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
-                        title="Delete permanently"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {isAdmin && (
+                        <>
+                          <button
+                            onClick={() => handleUnarchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData)}
+                            className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors duration-200"
+                            title="Restore applicant"
+                          >
+                            <ArchiveRestore className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`, deleteApplicant)}
+                            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                            title="Delete permanently"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </>
                   ) : (
                     <>
-                      <button
-                        onClick={() => openEditModal(applicant)}
-                        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
-                        title="Edit applicant"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleArchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData)}
-                        className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
-                        title="Delete (Archive)"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {isAdmin && (
+                        <>
+                          <button
+                            onClick={() => openEditModal(applicant)}
+                            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                            title="Edit applicant"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleArchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData)}
+                            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                            title="Delete (Archive)"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>
