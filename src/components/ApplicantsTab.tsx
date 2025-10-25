@@ -5,6 +5,7 @@ import { useData } from '../hooks/useData.ts';
 import { Applicant, calculateAge } from "../utils/dataService.ts";
 import { handleArchive, handleUnarchive, handleDelete } from '../components/ApplicantActions.tsx';
 import ApplicantForm from '../components/ApplicantForm.tsx';
+import ApplicantProfile from '../components/ApplicantProfile.tsx';
 import Swal from "sweetalert2";
 
 interface ApplicantsTabProps {
@@ -27,6 +28,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [applicantCode, setApplicantCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [viewingApplicant, setViewingApplicant] = useState<Applicant | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -247,6 +249,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           age,
           barangay: formData.barangay,
           contactNumber: formData.contactNumber,
+          email: formData.email || undefined,
+          school: formData.school || undefined,
           gender: formData.gender,
           educationalAttainment: formData.educationalAttainment || '',
           beneficiaryName: formData.beneficiaryName || undefined,
@@ -294,6 +298,8 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           age,
           barangay: formData.barangay,
           contactNumber: formData.contactNumber,
+          email: formData.email || undefined,
+          school: formData.school || undefined,
           gender: formData.gender,
           educationalAttainment: formData.educationalAttainment || '',
           beneficiaryName: formData.beneficiaryName || undefined,
@@ -347,7 +353,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     const fieldsToCapitalize = [
       'firstName', 'middleName', 'lastName', 'extensionName',
       'barangay', 'idNumber', 'occupation', 'dependentName',
-      'relationshipToDependent', 'beneficiaryName'
+      'relationshipToDependent', 'beneficiaryName', 'school'
     ];
 
     if (fieldsToCapitalize.includes(field) && typeof value === 'string') {
@@ -616,7 +622,12 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
               <div key={applicant.id} className="grid grid-cols-8 gap-4 px-6 py-4 hover:bg-gray-50">
                 <div className="font-medium text-sm">{applicant.code}</div>
                 <div className="text-sm">
-                  {`${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim()}
+                  <button
+                    onClick={() => setViewingApplicant(applicant)}
+                    className="text-blue-600 hover:text-blue-800 hover:underline text-left"
+                  >
+                    {`${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim()}
+                  </button>
                 </div>
                 <div className="text-sm">{applicant.age}</div>
                 <div className="text-sm">{applicant.barangay}</div>
@@ -722,6 +733,13 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         onInputChange={handleInputChange}
         onSubmit={handleSubmit}
       />
+
+      {viewingApplicant && (
+        <ApplicantProfile
+          applicant={viewingApplicant}
+          onClose={() => setViewingApplicant(null)}
+        />
+      )}
     </div>
   );
 };

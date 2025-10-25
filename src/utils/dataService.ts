@@ -10,6 +10,8 @@ export interface Applicant {
   age: number;
   barangay: string;
   contactNumber: string;
+  email?: string;
+  school?: string;
   gender: 'MALE' | 'FEMALE';
   educationalAttainment: string;
   beneficiaryName?: string;
