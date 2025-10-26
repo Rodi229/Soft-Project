@@ -10,11 +10,18 @@ export interface Applicant {
   age: number;
   barangay: string;
   contactNumber: string;
+  telephoneNumber?: string;
   email?: string;
+  placeOfBirth?: string;
   school?: string;
   gender: 'MALE' | 'FEMALE';
+  civilStatus?: string;
   educationalAttainment: string;
+  course?: string;
   beneficiaryName?: string;
+  photoFile?: File;
+  photoFileName?: string;
+  photoFileData?: string;
   resumeFile?: File;
   resumeFileName?: string;
   resumeFileData?: string;
@@ -25,7 +32,6 @@ export interface Applicant {
   idType?: string;
   idNumber?: string;
   occupation?: string;
-  civilStatus?: string;
   averageMonthlyIncome?: string;
   dependentName?: string;
   relationshipToDependent?: string;
