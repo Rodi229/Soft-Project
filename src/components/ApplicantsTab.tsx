@@ -581,20 +581,24 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           <div></div>
 
           <div className="md:col-span-2 flex space-x-2 justify-end">
-            <button
-              onClick={handleExportCSV}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-            >
-              <Download className="w-4 h-4" />
-              <span>CSV</span>
-            </button>
-            <button
-              onClick={handleExportPDF}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-            >
-              <FileText className="w-4 h-4" />
-              <span>PDF</span>
-            </button>
+            {isAdmin && (
+              <>
+                <button
+                  onClick={handleExportCSV}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>CSV</span>
+                </button>
+                <button
+                  onClick={handleExportPDF}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>PDF</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -625,7 +629,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className={`${headerBgColor} text-white`}>
-          <div className="grid grid-cols-8 gap-4 px-6 py-3 text-sm font-medium">
+          <div className={`grid ${isAdmin ? 'grid-cols-8' : 'grid-cols-7'} gap-4 px-6 py-3 text-sm font-medium`}>
             <div>CODE</div>
             <div>NAME</div>
             <div>AGE</div>
@@ -633,7 +637,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             <div>GENDER</div>
             <div>STATUS</div>
             <div>DATE SUBMITTED</div>
-            <div>ACTIONS</div>
+            {isAdmin && <div>ACTIONS</div>}
           </div>
         </div>
 
@@ -644,15 +648,16 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
         ) : (
           <div className="divide-y divide-gray-200">
             {currentEntries.map((applicant) => (
-              <div key={applicant.id} className="grid grid-cols-8 gap-4 px-6 py-4 hover:bg-gray-50">
+              <div
+                key={applicant.id}
+                className={`grid ${isAdmin ? 'grid-cols-8' : 'grid-cols-7'} gap-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150 cursor-pointer`}
+                onClick={() => setViewingApplicant(applicant)}
+              >
                 <div className="font-medium text-sm">{applicant.code}</div>
                 <div className="text-sm">
-                  <button
-                    onClick={() => setViewingApplicant(applicant)}
-                    className="text-blue-600 hover:text-blue-800 hover:underline text-left"
-                  >
+                  <span className="text-blue-600 font-medium">
                     {`${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim()}
-                  </button>
+                  </span>
                 </div>
                 <div className="text-sm">{applicant.age}</div>
                 <div className="text-sm">{applicant.barangay}</div>
@@ -670,51 +675,45 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                   </span>
                 </div>
                 <div className="text-sm">{applicant.dateSubmitted}</div>
-                <div className="flex items-center space-x-2">
-                  {showArchived ? (
-                    <>
-                      {isAdmin && (
-                        <>
-                          <button
-                            onClick={() => handleUnarchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData)}
-                            className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors duration-200"
-                            title="Restore applicant"
-                          >
-                            <ArchiveRestore className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`, deleteApplicant)}
-                            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
-                            title="Delete permanently"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {isAdmin && (
-                        <>
-                          <button
-                            onClick={() => openEditModal(applicant)}
-                            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
-                            title="Edit applicant"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleArchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData)}
-                            className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
-                            title="Delete (Archive)"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-                    </>
-                  )}
-                </div>
+                {isAdmin && (
+                  <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                    {showArchived ? (
+                      <>
+                        <button
+                          onClick={() => handleUnarchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData)}
+                          className="p-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors duration-200"
+                          title="Restore applicant"
+                        >
+                          <ArchiveRestore className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(applicant.id, `${applicant.firstName} ${applicant.lastName}`, deleteApplicant)}
+                          className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                          title="Delete permanently"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openEditModal(applicant); }}
+                          className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                          title="Edit applicant"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleArchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData); }}
+                          className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
+                          title="Delete (Archive)"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
