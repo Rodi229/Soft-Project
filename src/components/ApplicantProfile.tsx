@@ -37,7 +37,7 @@ const ApplicantProfile: React.FC<ApplicantProfileProps> = ({ applicant, onClose 
       [''],
       ['5. GENDER', applicant.gender === 'MALE' ? 'Male' : 'Female'],
       [''],
-      ['6. CIVIL STATUS', applicant.civilStatus || '-'],
+      ['6. CIVIL STATUS', applicant.civilStats || '-'],
       [''],
       ['7. EDUCATIONAL ATTAINMENT'],
       ['NAME OF SCHOOL', 'INCLUSIVE DATES', 'DEGREE OR DIPLOMA', 'COURSE'],
@@ -197,7 +197,7 @@ const ApplicantProfile: React.FC<ApplicantProfileProps> = ({ applicant, onClose 
               <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
                 <p className="font-semibold text-sm mb-3 text-gray-800">6. CIVIL STATUS</p>
                 <div className="bg-white p-4 rounded border-2 border-gray-400 shadow-sm">
-                  <p className="font-medium text-gray-900">{applicant.civilStatus || '-'}</p>
+                  <p className="font-medium text-gray-900">{applicant.civilStats || '-'}</p>
                 </div>
               </div>
 

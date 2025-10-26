@@ -107,6 +107,101 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
             />
           </div>
 
+          {activeProgram === 'GIP' && (
+            <div>
+              <label className="block text-sm font-bold mb-1 uppercase">Upload 2x2 Photo *</label>
+              <div className="flex items-center gap-3 border rounded-lg px-3 py-2 bg-white">
+                <label className="cursor-pointer shrink-0">
+                  <span className="bg-yellow-400 px-3 py-1 rounded-md font-medium hover:bg-yellow-500 transition whitespace-nowrap">
+                    Choose File
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          onInputChange('photoFile', file);
+                          onInputChange('photoFileName', file.name);
+                          onInputChange('photoFileData', reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      } else {
+                        onInputChange('photoFile', null);
+                        onInputChange('photoFileName', '');
+                        onInputChange('photoFileData', '');
+                      }
+                    }}
+                  />
+                </label>
+                {(formData.photoFileName || editingApplicant?.photoFileName) ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-green-600 font-medium">
+                      {formData.photoFileName || editingApplicant?.photoFileName}
+                    </span>
+                    {(formData.photoFileData || editingApplicant?.photoFileData) && (
+                      <img
+                        src={formData.photoFileData || editingApplicant?.photoFileData}
+                        alt="Preview"
+                        className="w-8 h-8 object-cover rounded border"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-gray-500 text-sm">No file chosen</span>
+                )}
+              </div>
+            </div>
+          )}
+
+           <div>
+            <label className="block text-sm font-bold mb-1 uppercase">Upload Resume</label>
+            <div className="flex items-center gap-3 border rounded-lg px-3 py-2 bg-white">
+              <label className="cursor-pointer shrink-0">
+                <span className="bg-yellow-400 px-3 py-1 rounded-md font-medium hover:bg-yellow-500 transition whitespace-nowrap">
+                  Choose File
+                </span>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      onInputChange('resumeFile', file);
+                      onInputChange('resumeFileName', file.name);
+                    } else {
+                      onInputChange('resumeFile', null);
+                      onInputChange('resumeFileName', '');
+                    }
+                  }}
+                />
+              </label>
+
+              {(formData.resumeFileName || editingApplicant?.resumeFileName) ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const fileName = formData.resumeFileName || editingApplicant?.resumeFileName;
+                    const fileData = formData.resumeFileData || editingApplicant?.resumeFileData;
+                    if (fileName && fileData) {
+                      downloadResume(fileName, fileData);
+                    }
+                  }}
+                  className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium truncate max-w-[150px] text-left"
+                  title={formData.resumeFileName || editingApplicant?.resumeFileName}
+                >
+                  {formData.resumeFileName || editingApplicant?.resumeFileName}
+                </button>
+              ) : (
+                <span className="text-gray-500 text-sm">No file chosen</span>
+              )}
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">First Name *</label>
             <input
@@ -183,6 +278,18 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
             </p>
           </div>
 
+          <div>
+            <label className="block text-sm font-bold mb-1 uppercase">Gender *</label>
+            <select
+              value={formData.gender}
+              onChange={(e) => onInputChange('gender', e.target.value)}
+              className="w-full border rounded-lg px-3 py-2"
+            >
+              <option value="MALE">MALE</option>
+              <option value="FEMALE">FEMALE</option>
+            </select>
+          </div>
+
           {activeProgram === 'GIP' && (
             <div>
               <label className="block text-sm font-bold mb-1 uppercase">Place of Birth *</label>
@@ -197,18 +304,6 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
               />
             </div>
           )}
-
-          <div>
-            <label className="block text-sm font-bold mb-1 uppercase">Gender *</label>
-            <select
-              value={formData.gender}
-              onChange={(e) => onInputChange('gender', e.target.value)}
-              className="w-full border rounded-lg px-3 py-2"
-            >
-              <option value="MALE">MALE</option>
-              <option value="FEMALE">FEMALE</option>
-            </select>
-          </div>
 
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">Barangay *</label>
@@ -285,9 +380,12 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
                 placeholder="(Area code) Number"
                 className="w-full border rounded-lg px-3 py-2"
               />
+                <p className="text-xs text-gray-500 mt-1">Put N/A if none</p>
+
             </div>
           )}
 
+          {activeProgram === 'GIP' && (
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">Email *</label>
             <input
@@ -299,7 +397,26 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
               className="w-full border rounded-lg px-3 py-2"
             />
           </div>
+           )}
 
+          {activeProgram === 'GIP' && (
+            <div>
+              <label className="block text-sm font-bold mb-1 uppercase">Civil Status *</label>
+              <select
+                value={formData.civilStats || ''}
+                onChange={(e) => onInputChange('civilStats', e.target.value)}
+                required
+                className="w-full border rounded-lg px-3 py-2"
+              >
+                <option value="">SELECT CIVIL STATUS</option>
+                <option>SINGLE</option>
+                <option>MARRIED</option>
+                <option>WIDOW/WIDOWER</option>
+              </select>
+            </div>
+          )}
+          
+          {activeProgram === 'GIP' && (
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">School</label>
             <input
@@ -311,23 +428,8 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
               style={{ textTransform: 'uppercase' }}
             />
           </div>
-
-          {activeProgram === 'GIP' && (
-            <div>
-              <label className="block text-sm font-bold mb-1 uppercase">Civil Status *</label>
-              <select
-                value={formData.civilStatus || ''}
-                onChange={(e) => onInputChange('civilStatus', e.target.value)}
-                required
-                className="w-full border rounded-lg px-3 py-2"
-              >
-                <option value="">SELECT CIVIL STATUS</option>
-                <option>SINGLE</option>
-                <option>MARRIED</option>
-                <option>WIDOW/WIDOWER</option>
-              </select>
-            </div>
           )}
+
 
           {activeProgram === 'TUPAD' && (
             <>
@@ -453,59 +555,55 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
               </div>
 
               {isCourseFieldActive && (
-                <div>
-                  <label className="block text-sm font-bold mb-1 uppercase">
-                    Course * {formData.educationalAttainment === 'COLLEGE GRADUATE' ? '(College)' : '(Technical/Vocational)'}
-                  </label>
-                  {!showCustomCourse ? (
-                    <select
-                      value={formData.course || ''}
-                      onChange={(e) => {
-                        if (e.target.value === 'OTHER') {
-                          setShowCustomCourse(true);
-                          onInputChange('course', '');
-                        } else {
-                          onInputChange('course', e.target.value);
-                        }
-                      }}
-                      required
-                      className="w-full border rounded-lg px-3 py-2"
-                    >
-                      <option value="">SELECT COURSE</option>
-                      {courseOptions.map((course) => (
-                        <option key={course} value={course}>{course}</option>
-                      ))}
-                      <option value="OTHER">OTHER (Type manually)</option>
-                    </select>
-                  ) : (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={customCourse}
-                        onChange={(e) => {
-                          setCustomCourse(e.target.value);
-                          onInputChange('course', e.target.value);
-                        }}
-                        required
-                        placeholder="Type your course"
-                        className="w-full border rounded-lg px-3 py-2 uppercase"
-                        style={{ textTransform: 'uppercase' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowCustomCourse(false);
-                          setCustomCourse('');
-                          onInputChange('course', '');
-                        }}
-                        className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm"
-                      >
-                        Back
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-bold mb-1 uppercase">
+                  Course * {formData.educationalAttainment === 'COLLEGE GRADUATE' ? '(College)' : '(Technical/Vocational)'}
+                </label>
+
+                {!showCustomCourse ? (
+                  <select
+                    value={formData.course || ''}
+                    onChange={(e) => {
+                      if (e.target.value === 'OTHER') {
+                        setShowCustomCourse(true);
+                        onInputChange('course', '');
+                      } else {
+                        onInputChange('course', e.target.value);
+                      }
+                    }}
+                    required
+                    className="w-full border rounded-lg px-3 py-2"
+                  >
+                    <option value="">SELECT COURSE</option>
+                    <option value="OTHER">OTHER (Type manually)</option>
+                    {courseOptions.map((course) => (
+                      <option key={course} value={course}>
+                        {course}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={customCourse}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase();
+                      setCustomCourse(value);
+                      onInputChange('course', value);
+
+                      // Automatically revert back to dropdown when cleared
+                      if (value.trim() === '') {
+                        setShowCustomCourse(false);
+                      }
+                    }}
+                    required
+                    placeholder="Type your course"
+                    className="w-full border rounded-lg px-3 py-2 uppercase"
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                )}
+              </div>
+            )}
 
               <div>
                 <label className="block text-sm font-bold mb-1 uppercase">Beneficiary Name</label>
@@ -519,101 +617,6 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
               </div>
             </>
           )}
-
-          {activeProgram === 'GIP' && (
-            <div>
-              <label className="block text-sm font-bold mb-1 uppercase">Upload 2x2 Photo *</label>
-              <div className="flex items-center gap-3 border rounded-lg px-3 py-2 bg-white">
-                <label className="cursor-pointer shrink-0">
-                  <span className="bg-yellow-400 px-3 py-1 rounded-md font-medium hover:bg-yellow-500 transition whitespace-nowrap">
-                    Choose File
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          onInputChange('photoFile', file);
-                          onInputChange('photoFileName', file.name);
-                          onInputChange('photoFileData', reader.result as string);
-                        };
-                        reader.readAsDataURL(file);
-                      } else {
-                        onInputChange('photoFile', null);
-                        onInputChange('photoFileName', '');
-                        onInputChange('photoFileData', '');
-                      }
-                    }}
-                  />
-                </label>
-                {(formData.photoFileName || editingApplicant?.photoFileName) ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-green-600 font-medium">
-                      {formData.photoFileName || editingApplicant?.photoFileName}
-                    </span>
-                    {(formData.photoFileData || editingApplicant?.photoFileData) && (
-                      <img
-                        src={formData.photoFileData || editingApplicant?.photoFileData}
-                        alt="Preview"
-                        className="w-8 h-8 object-cover rounded border"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-gray-500 text-sm">No file chosen</span>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-bold mb-1 uppercase">Upload Resume</label>
-            <div className="flex items-center gap-3 border rounded-lg px-3 py-2 bg-white">
-              <label className="cursor-pointer shrink-0">
-                <span className="bg-yellow-400 px-3 py-1 rounded-md font-medium hover:bg-yellow-500 transition whitespace-nowrap">
-                  Choose File
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      onInputChange('resumeFile', file);
-                      onInputChange('resumeFileName', file.name);
-                    } else {
-                      onInputChange('resumeFile', null);
-                      onInputChange('resumeFileName', '');
-                    }
-                  }}
-                />
-              </label>
-
-              {(formData.resumeFileName || editingApplicant?.resumeFileName) ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const fileName = formData.resumeFileName || editingApplicant?.resumeFileName;
-                    const fileData = formData.resumeFileData || editingApplicant?.resumeFileData;
-                    if (fileName && fileData) {
-                      downloadResume(fileName, fileData);
-                    }
-                  }}
-                  className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium truncate max-w-[150px] text-left"
-                  title={formData.resumeFileName || editingApplicant?.resumeFileName}
-                >
-                  {formData.resumeFileName || editingApplicant?.resumeFileName}
-                </button>
-              ) : (
-                <span className="text-gray-500 text-sm">No file chosen</span>
-              )}
-            </div>
-          </div>
 
           <div>
             <label className="block text-sm font-bold mb-1 uppercase">Status</label>

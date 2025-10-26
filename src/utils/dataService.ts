@@ -1,5 +1,6 @@
 // Data service for managing applicants and statistics
 export interface Applicant {
+  civilStats: string;
   id: string;
   code: string;
   firstName: string;
