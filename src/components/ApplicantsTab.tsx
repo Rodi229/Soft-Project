@@ -650,9 +650,12 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             {currentEntries.map((applicant) => (
               <div
                 key={applicant.id}
-                className={`grid ${isAdmin ? 'grid-cols-8' : 'grid-cols-7'} gap-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150 cursor-pointer`}
+                className={`grid ${isAdmin ? 'grid-cols-8' : 'grid-cols-7'} gap-4 px-6 py-4 
+                            cursor-pointer transition-all duration-200 
+                            hover:bg-red-50 hover:shadow-md hover:scale-[1.01] rounded-lg`}
                 onClick={() => setViewingApplicant(applicant)}
               >
+
                 <div className="font-medium text-sm">{applicant.code}</div>
                 <div className="text-sm">
                   <span className="text-blue-600 font-medium">
