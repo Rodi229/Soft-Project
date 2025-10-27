@@ -250,7 +250,7 @@ const ApplicantForm: React.FC<ApplicantFormProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-1 uppercase">Birth Date * (YYYY/MM/DD)</label>
+            <label className="block text-sm font-bold mb-1 uppercase">Birth Date</label>
             <input
               type="date"
               value={formData.birthDate}
