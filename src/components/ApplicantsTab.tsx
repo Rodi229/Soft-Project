@@ -59,10 +59,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
     averageMonthlyIncome: '',
     dependentName: '',
     relationshipToDependent: '',
-    resumeFile: null as File | null,
-    photoFile: null as File | null,
-    photoFileName: '',
-    photoFileData: ''
+    resumeFile: null as File | null
   });
 
   const generateApplicantCode = () => {
@@ -120,10 +117,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       averageMonthlyIncome: applicant.averageMonthlyIncome || '',
       dependentName: applicant.dependentName || '',
       relationshipToDependent: applicant.relationshipToDependent || '',
-      resumeFile: null,
-      photoFile: null,
-      photoFileName: applicant.photoFileName || '',
-      photoFileData: applicant.photoFileData || ''
+      resumeFile: null
     });
     setShowModal(true);
   };
@@ -158,10 +152,7 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
       averageMonthlyIncome: '',
       dependentName: '',
       relationshipToDependent: '',
-      resumeFile: null,
-      photoFile: null,
-      photoFileName: '',
-      photoFileData: ''
+      resumeFile: null
     });
   };
 
@@ -287,8 +278,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           program: activeProgram,
           resumeFileName,
           resumeFileData,
-          photoFileName,
-          photoFileData,
           idType: activeProgram === 'TUPAD' ? formData.idType : undefined,
           idNumber: activeProgram === 'TUPAD' ? formData.idNumber : undefined,
           occupation: activeProgram === 'TUPAD' ? formData.occupation : undefined,
@@ -319,17 +308,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           resumeFileData = await fileToBase64(formData.resumeFile);
         }
 
-        let photoFileName: string | undefined;
-        let photoFileData: string | undefined;
-
-        if (formData.photoFile) {
-          photoFileName = formData.photoFile.name;
-          photoFileData = await fileToBase64(formData.photoFile);
-        } else if (formData.photoFileData) {
-          photoFileName = formData.photoFileName;
-          photoFileData = formData.photoFileData;
-        }
-
         const applicantData: Omit<Applicant, 'id' | 'dateSubmitted'> = {
           firstName: formData.firstName,
           middleName: formData.middleName || undefined,
@@ -354,8 +332,6 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
           program: activeProgram,
           resumeFileName,
           resumeFileData,
-          photoFileName,
-          photoFileData,
           idType: activeProgram === 'TUPAD' ? formData.idType : undefined,
           idNumber: activeProgram === 'TUPAD' ? formData.idNumber : undefined,
           occupation: activeProgram === 'TUPAD' ? formData.occupation : undefined,
@@ -674,13 +650,15 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
             {currentEntries.map((applicant) => (
               <div
                 key={applicant.id}
-                className={`grid ${isAdmin ? 'grid-cols-8' : 'grid-cols-7'} gap-4 px-6 py-4 hover:bg-gray-50 transition-colors duration-150 cursor-pointer`}
+                className={`grid ${isAdmin ? 'grid-cols-8' : 'grid-cols-7'} gap-4 px-6 py-4 
+                            cursor-pointer transition-all duration-200 
+                            hover:bg-red-50 hover:shadow-md hover:scale-[1.01] rounded-lg`}
                 onClick={() => setViewingApplicant(applicant)}
               >
 
                 <div className="font-medium text-sm">{applicant.code}</div>
                 <div className="text-sm">
-                  <span className="text-gray-800 font-medium">
+                  <span className="text-blue-600 font-medium">
                     {`${applicant.firstName} ${applicant.middleName || ''} ${applicant.lastName} ${applicant.extensionName || ''}`.trim()}
                   </span>
                 </div>
@@ -723,19 +701,17 @@ const ApplicantsTab: React.FC<ApplicantsTabProps> = ({ activeProgram }) => {
                       <>
                         <button
                           onClick={(e) => { e.stopPropagation(); openEditModal(applicant); }}
-                          className="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center space-x-1"
+                          className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors duration-200"
                           title="Edit applicant"
                         >
                           <Edit className="w-4 h-4" />
-                          <span className="text-xs font-semibold">Edit</span>
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleArchive(applicant.id, `${applicant.firstName} ${applicant.lastName}`, getFilteredApplicants, updateApplicant, refreshData); }}
-                          className="px-3 py-1.5 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center space-x-1"
+                          className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200"
                           title="Delete (Archive)"
                         >
                           <Trash2 className="w-4 h-4" />
-                          <span className="text-xs font-semibold">Delete</span>
                         </button>
                       </>
                     )}
